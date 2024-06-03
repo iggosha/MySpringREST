@@ -1,7 +1,9 @@
-package ru.golovkov.myrestapp.model;
+package ru.golovkov.myrestapp.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "people")
@@ -14,7 +16,9 @@ public class Person {
 
     private String name;
 
-    private int age;
+    private Integer age;
 
     private String email;
+
+    private LocalDate registrationDate;
 }
