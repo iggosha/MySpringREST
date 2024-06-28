@@ -1,6 +1,7 @@
 package ru.golovkov.myrestapp.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.golovkov.myrestapp.exc.PersonNotFoundException;
@@ -23,10 +24,14 @@ public class PersonServiceImpl implements PersonService {
 
     private final PersonMapper personMapper;
 
+    private final PasswordEncoder passwordEncoder;
+
     @Override
     public void create(PersonRequestDto personRequestDto) {
         Person person = personMapper.toEntity(personRequestDto);
         person.setRegistrationDate(LocalDate.now());
+        person.setRole("ROLE_BASE");
+        person.setPassword(passwordEncoder.encode(personRequestDto.getPassword()));
         personRepository.save(person);
     }
 
@@ -39,7 +44,7 @@ public class PersonServiceImpl implements PersonService {
     @Transactional(readOnly = true)
     @Override
     public List<PersonResponseDto> getAll() {
-        return personRepository.findAll().stream().map(personMapper::toResponseDto).toList();
+        return personMapper.personListToPersonResponseDtoList(personRepository.findAll());
     }
 
     @Override
@@ -51,7 +56,14 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public void deleteById(Long id) {
+        checkIfPersonExistsById(id);
         personRepository.deleteById(id);
+    }
+
+    private void checkIfPersonExistsById(Long id) {
+        if (!personRepository.existsById(id)) {
+            throw new PersonNotFoundException(STR."Person with id \{id} not found");
+        }
     }
 
     private Person getPersonById(Long id) {

@@ -14,11 +14,17 @@ public class Person {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private String name;
 
     private Integer age;
 
+    @Column(unique = true)
     private String email;
+
+    private String password;
+
+    private String role;
 
     private LocalDate registrationDate;
 }

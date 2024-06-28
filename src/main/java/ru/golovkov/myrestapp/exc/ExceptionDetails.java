@@ -7,12 +7,12 @@ import java.util.Date;
 @Data
 public class ExceptionDetails {
 
-    private Date timestamp;
+    private String timestamp;
 
     private String message;
 
     public ExceptionDetails(String message) {
-        this.timestamp = new Date();
+        this.timestamp = new Date().toString();
         this.message = message;
     }
 }

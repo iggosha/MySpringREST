@@ -15,6 +15,10 @@ public class PersonResponseDto {
 
     private String email;
 
+    private String password;
+
+    private String role;
+
     private LocalDate registrationDate;
 
 }
