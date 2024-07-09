@@ -1,4 +1,4 @@
-package ru.golovkov.myrestapp.model.security;
+package ru.golovkov.myrestapp.security;
 
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

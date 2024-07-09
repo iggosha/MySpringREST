@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.golovkov.myrestapp.exc.PersonNotFoundException;
 import ru.golovkov.myrestapp.model.entity.Person;
-import ru.golovkov.myrestapp.model.security.PersonDetails;
 import ru.golovkov.myrestapp.repository.PersonRepository;
+import ru.golovkov.myrestapp.security.PersonDetails;
 import ru.golovkov.myrestapp.service.PersonDetailsService;
 
 @Service
@@ -22,7 +22,7 @@ public class PersonDetailsServiceImpl implements PersonDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Person person = personRepository
                 .findByName(username)
-                .orElseThrow(() -> new PersonNotFoundException("User with name " + username + " not found"));
+                .orElseThrow(() -> new PersonNotFoundException("User with name '" + username + "' not found"));
         return new PersonDetails(person);
     }
 }

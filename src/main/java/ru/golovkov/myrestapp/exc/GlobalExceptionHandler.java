@@ -21,11 +21,11 @@ public class GlobalExceptionHandler {
         return new ExceptionDetails(e.toString());
     }
 
-//    @ExceptionHandler({DataIntegrityViolationException.class, IllegalArgumentException.class})
-//    @ResponseStatus(HttpStatus.BAD_REQUEST)
-//    public ExceptionDetails handle400(RuntimeException e) {
-//        return new ExceptionDetails(e.toString());
-//    }
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDetails handle400(BadRequestException e) {
+        return new ExceptionDetails(e.toString());
+    }
 
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
