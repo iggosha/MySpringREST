@@ -25,7 +25,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             objectMapper
-                    .writerWithDefaultPrettyPrinter()
                     .writeValue(response.getWriter(),
                             new ExceptionDetails(
                                     "[Exception: " + authException +

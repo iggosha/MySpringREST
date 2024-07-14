@@ -19,10 +19,10 @@ public class PersonDetailsServiceImpl implements PersonDetailsService {
 
     @Transactional(readOnly = true)
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
         Person person = personRepository
-                .findByName(username)
-                .orElseThrow(() -> new PersonNotFoundException("User with name '" + username + "' not found"));
+                .findByName(name)
+                .orElseThrow(() -> new PersonNotFoundException(STR."User with name '\{name}' not found"));
         return new PersonDetails(person);
     }
 }

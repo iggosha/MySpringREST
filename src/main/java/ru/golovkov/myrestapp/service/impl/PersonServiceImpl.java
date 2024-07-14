@@ -9,6 +9,7 @@ import ru.golovkov.myrestapp.mapper.PersonMapper;
 import ru.golovkov.myrestapp.model.dto.request.PersonRequestDto;
 import ru.golovkov.myrestapp.model.dto.response.PersonResponseDto;
 import ru.golovkov.myrestapp.model.entity.Person;
+import ru.golovkov.myrestapp.model.entity.UserRole;
 import ru.golovkov.myrestapp.repository.PersonRepository;
 import ru.golovkov.myrestapp.service.PersonService;
 
@@ -30,7 +31,7 @@ public class PersonServiceImpl implements PersonService {
     public void create(PersonRequestDto personRequestDto) {
         Person person = personMapper.toEntity(personRequestDto);
         person.setRegistrationDate(LocalDate.now());
-        person.setRole("ROLE_BASE");
+        person.setRole(UserRole.ROLE_BASE);
         person.setPassword(passwordEncoder.encode(personRequestDto.getPassword()));
         personRepository.save(person);
     }

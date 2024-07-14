@@ -24,7 +24,8 @@ public class Person {
 
     private String password;
 
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private UserRole role;
 
     private LocalDate registrationDate;
 }
