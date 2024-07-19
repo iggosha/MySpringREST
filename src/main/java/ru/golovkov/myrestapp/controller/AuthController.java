@@ -38,7 +38,8 @@ public class AuthController {
 
     @SecurityRequirement(name = "Authorization")
     @GetMapping("/public/hello")
-    @Operation(summary = "Приветствие пользователя", responses = {
+    @Operation(summary = "Приветствие пользователя")
+    @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
                     description = "Приветствие, либо вывод данных авторизованного пользователя",
@@ -59,12 +60,16 @@ public class AuthController {
                                             """,
                                             description = "Данные пользователя, если он авторизован")
                             },
-                            schema = @Schema(type = "object"))}
+                            schema = @Schema(type = "object")
+                    )}
             ),
             @ApiResponse(
                     responseCode = "400",
                     description = "Некорректные данные авторизации",
-                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ExceptionDetails.class))}
+                    content = {@Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ExceptionDetails.class)
+                    )}
             )
     })
     public Map<String, String> getHello(Authentication authentication) {
@@ -95,13 +100,24 @@ public class AuthController {
                                             }""",
                                     description = "Успешно сгенерированный JWT")
                             },
-                            schema = @Schema(type = "object"))
-                    }
+                            schema = @Schema(type = "object")
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Неверные данные для входа",
+                    content = {@Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ExceptionDetails.class)
+                    )}
             ),
             @ApiResponse(
                     responseCode = "404",
                     description = "Не найден пользователь с такими данными",
-                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ExceptionDetails.class))}
+                    content = {@Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ExceptionDetails.class)
+                    )}
             )
     })
     public Map<String, String> postLogin(@RequestParam String name, @RequestParam String password) {
@@ -115,7 +131,7 @@ public class AuthController {
     }
 
     @PostMapping("/public/registration")
-    @Operation(summary = "Регистрация и получение JWT")
+    @Operation(summary = "Регистрация")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
@@ -126,17 +142,20 @@ public class AuthController {
                                     name = "Созданный пользователь",
                                     value = """
                                             {
-                                              "Created user": "PersonRequestDto(name=name, age=1, email=email, password=1)"
+                                              "Created user": "PersonRequestDto(name=name, age=1, email=email@email.com, password=1)"
                                             }""",
                                     description = "Данные созданного пользователя")
                             },
-                            schema = @Schema(type = "object"))
-                    }
+                            schema = @Schema(type = "object")
+                    )}
             ),
             @ApiResponse(
                     responseCode = "400",
-                    description = "Неверные данные для для регистрации",
-                    content = {@Content(mediaType = MediaType.APPLICATION_JSON_VALUE, schema = @Schema(implementation = ExceptionDetails.class))}
+                    description = "Неверные данные для регистрации",
+                    content = {@Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ExceptionDetails.class)
+                    )}
             )
     })
     @ResponseStatus(HttpStatus.CREATED)
