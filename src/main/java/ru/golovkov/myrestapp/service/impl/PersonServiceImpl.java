@@ -1,10 +1,14 @@
 package ru.golovkov.myrestapp.service.impl;
 
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.golovkov.myrestapp.exc.BadRequestException;
 import ru.golovkov.myrestapp.exc.PersonNotFoundException;
+import ru.golovkov.myrestapp.exc.WrongPasswordException;
 import ru.golovkov.myrestapp.mapper.PersonMapper;
 import ru.golovkov.myrestapp.model.dto.request.PersonRequestDto;
 import ru.golovkov.myrestapp.model.dto.response.PersonResponseDto;
@@ -29,6 +33,16 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public void create(PersonRequestDto personRequestDto) {
+        if (personRequestDto.getPassword() == null ||
+                personRequestDto.getAge() == null ||
+                personRequestDto.getEmail() == null ||
+                personRequestDto.getName() == null ||
+                personRequestDto.getPassword().isBlank() ||
+                personRequestDto.getEmail().isBlank() ||
+                personRequestDto.getName().isBlank()
+        ) {
+            throw new BadRequestException("All fields must be filled");
+        }
         Person person = personMapper.toEntity(personRequestDto);
         person.setRegistrationDate(LocalDate.now());
         person.setRole(UserRole.ROLE_BASE);
@@ -58,8 +72,17 @@ public class PersonServiceImpl implements PersonService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<PersonResponseDto> getAllByNameContaining(String name) {
-        List<Person> personList = personRepository.findAllByNameContainingIgnoreCase(name);
+    public List<PersonResponseDto> getAllByNameContaining(String name, int pageNumber, int pageSize) {
+        PageRequest pageRequest;
+        List<Person> personList;
+        if (name == null || name.isBlank()) {
+            pageRequest = PageRequest.of(pageNumber, pageSize);
+            personList = personRepository.findAll(pageRequest).getContent();
+        } else {
+            pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, "name"));
+            personList = personRepository
+                    .findAllByNameContainingIgnoreCase(pageRequest, name).getContent();
+        }
         checkIfPersonListNotEmpty(personList);
         return personMapper.personListToPersonResponseDtoList(personList);
     }
@@ -68,6 +91,9 @@ public class PersonServiceImpl implements PersonService {
     public void updateById(PersonRequestDto personRequestDto, Long id) {
         Person personToUpdate = getPersonById(id);
         personMapper.updateEntityFromRequestDto(personToUpdate, personRequestDto);
+        if (personRequestDto.getPassword() != null && !personRequestDto.getPassword().isBlank()) {
+            personToUpdate.setPassword(passwordEncoder.encode(personRequestDto.getPassword()));
+        }
         personRepository.save(personToUpdate);
     }
 
@@ -75,6 +101,9 @@ public class PersonServiceImpl implements PersonService {
     public void updateByName(PersonRequestDto personRequestDto, String name) {
         Person personToUpdate = getPersonByName(name);
         personMapper.updateEntityFromRequestDto(personToUpdate, personRequestDto);
+        if (personRequestDto.getPassword() != null && !personRequestDto.getPassword().isBlank()) {
+            personToUpdate.setPassword(passwordEncoder.encode(personRequestDto.getPassword()));
+        }
         personRepository.save(personToUpdate);
     }
 
@@ -88,6 +117,17 @@ public class PersonServiceImpl implements PersonService {
     public void deleteByName(String name) {
         checkIfPersonExistsByName(name);
         personRepository.deleteByName(name);
+    }
+
+    @Override
+    public void upgradeRole(String rawPassword, Long id) {
+        Person person = getPersonById(id);
+        if (passwordEncoder.matches(rawPassword, person.getPassword())) {
+            person.setRole(UserRole.ROLE_ADMIN);
+        } else {
+            throw new WrongPasswordException();
+        }
+        personRepository.save(person);
     }
 
     private void checkIfPersonExistsById(Long id) {

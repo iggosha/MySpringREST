@@ -9,9 +9,11 @@ public interface PersonService extends CrudService<PersonRequestDto, PersonRespo
 
     PersonResponseDto getByName(String name);
 
-    List<PersonResponseDto> getAllByNameContaining(String name);
+    List<PersonResponseDto> getAllByNameContaining(String name, int pageNumber, int pageSize);
 
     void updateByName(PersonRequestDto personRequestDto, String name);
 
     void deleteByName(String name);
+
+    void upgradeRole(String rawPassword, Long id);
 }

@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
@@ -16,9 +17,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.golovkov.myrestapp.exc.BadRequestException;
 import ru.golovkov.myrestapp.exc.ExceptionDetails;
+import ru.golovkov.myrestapp.model.dto.request.PersonAuthRequestDto;
 import ru.golovkov.myrestapp.model.dto.request.PersonRequestDto;
 import ru.golovkov.myrestapp.security.JwtUtil;
 import ru.golovkov.myrestapp.security.PersonDetails;
@@ -62,14 +65,6 @@ public class AuthController {
                             },
                             schema = @Schema(type = "object")
                     )}
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Некорректные данные авторизации",
-                    content = {@Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ExceptionDetails.class)
-                    )}
             )
     })
     public Map<String, String> getHello(Authentication authentication) {
@@ -104,14 +99,6 @@ public class AuthController {
                     )}
             ),
             @ApiResponse(
-                    responseCode = "400",
-                    description = "Неверные данные для входа",
-                    content = {@Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ExceptionDetails.class)
-                    )}
-            ),
-            @ApiResponse(
                     responseCode = "404",
                     description = "Не найден пользователь с такими данными",
                     content = {@Content(
@@ -120,15 +107,15 @@ public class AuthController {
                     )}
             )
     })
-    public Map<String, String> postLogin(@RequestParam String name, @RequestParam String password) {
-        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(name, password);
-        try {
-            authenticationManager.authenticate(authToken);
-        } catch (BadCredentialsException e) {
-            throw new BadRequestException("Incorrect credentials");
-        }
-        return Map.of("jwt", jwtUtil.generateToken(name));
+    public Map<String, String> postLogin(@Valid @ParameterObject PersonAuthRequestDto personAuthRequestDto) {
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                personAuthRequestDto.getName(),
+                personAuthRequestDto.getPassword()
+        );
+        verifyCredentials(authToken);
+        return Map.of("jwt", jwtUtil.generateToken(personAuthRequestDto.getName()));
     }
+
 
     @PostMapping("/public/registration")
     @Operation(summary = "Регистрация")
@@ -148,19 +135,34 @@ public class AuthController {
                             },
                             schema = @Schema(type = "object")
                     )}
-            ),
-            @ApiResponse(
-                    responseCode = "400",
-                    description = "Неверные данные для регистрации",
-                    content = {@Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ExceptionDetails.class)
-                    )}
             )
     })
     @ResponseStatus(HttpStatus.CREATED)
-    public Map<String, String> postRegistration(@ParameterObject PersonRequestDto personRequestDto) {
+    @Validated
+    public Map<String, String> postRegistration(@Valid @ParameterObject PersonRequestDto personRequestDto) {
         personService.create(personRequestDto);
         return Map.of("Created user", personRequestDto.toString());
+    }
+
+    private void verifyCredentials(UsernamePasswordAuthenticationToken authToken) {
+        try {
+            authenticationManager.authenticate(authToken);
+        } catch (BadCredentialsException e) {
+            throw new BadRequestException("Incorrect credentials");
+        }
+    }
+
+    @ApiResponse(
+            responseCode = "400",
+            description = "Некорректные данные запроса",
+            content = {@Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ExceptionDetails.class)
+            )}
+    )
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionDetails handleBadRequestException(BadRequestException e) {
+        return new ExceptionDetails(e.toString());
     }
 }

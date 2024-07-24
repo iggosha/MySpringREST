@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -18,15 +19,25 @@ public class GlobalExceptionHandler {
         return new ExceptionDetails(e.toString());
     }
 
-    @ExceptionHandler(BadRequestException.class)
+    @ExceptionHandler({BadRequestException.class,
+            IllegalArgumentException.class,
+            DataIntegrityViolationException.class,
+            WrongPasswordException.class
+    })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDetails handleBadRequestException(BadRequestException e) {
+    public ExceptionDetails handleBadRequestException(RuntimeException e) {
         return new ExceptionDetails(e.toString());
     }
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ExceptionHandler({MethodArgumentNotValidException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public ExceptionDetails handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+    public ExceptionDetails handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        return new ExceptionDetails(e.toString());
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ExceptionDetails handleForbiddenException(ForbiddenException e) {
         return new ExceptionDetails(e.toString());
     }
 

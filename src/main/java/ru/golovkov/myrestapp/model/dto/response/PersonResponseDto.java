@@ -20,5 +20,4 @@ public class PersonResponseDto {
     private String role;
 
     private LocalDate registrationDate;
-
 }
