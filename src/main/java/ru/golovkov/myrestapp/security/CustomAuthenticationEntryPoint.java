@@ -27,9 +27,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             objectMapper
                     .writeValue(response.getWriter(),
                             new ExceptionDetails(
-                                    "[Exception: " + authException +
-                                            "] [ServletPath: " + request.getServletPath() +
-                                            "] [Method: " + request.getMethod() + "]"
+                                    STR."[Exception: \{authException}] [ServletPath: \{request.getServletPath()}] [Method: \{request.getMethod()}]"
                             )
                     );
         }

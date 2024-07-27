@@ -9,6 +9,7 @@ public class PersonAuthRequestDto {
 
     @NotBlank(message = "Name must not be blank")
     private String name;
+
     @NotBlank
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;

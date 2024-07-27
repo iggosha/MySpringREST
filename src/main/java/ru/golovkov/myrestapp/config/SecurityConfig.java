@@ -44,7 +44,6 @@ public class SecurityConfig {
                                 "/css/**",
                                 "/img/**",
                                 "/error",
-                                //swagger
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
@@ -58,7 +57,8 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .exceptionHandling(exceptionHandlingConfigurer ->
-                        exceptionHandlingConfigurer.authenticationEntryPoint(authEntryPoint)
+                        exceptionHandlingConfigurer
+                                .authenticationEntryPoint(authEntryPoint)
                 )
                 .sessionManagement(sessionManagementConfigurer ->
                         sessionManagementConfigurer

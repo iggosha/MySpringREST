@@ -14,6 +14,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import ru.golovkov.myrestapp.exc.BadRequestException;
 import ru.golovkov.myrestapp.exc.ExceptionDetails;
 import ru.golovkov.myrestapp.service.PersonDetailsService;
 
@@ -35,7 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
         if (authHeader != null && !authHeader.isBlank() && authHeader.startsWith(bearerPrefix)) {
             String jwt = authHeader.substring(bearerPrefix.length());
             if (jwt.isBlank()) {
-                setBadRequestInvalidJwtResponse(response, new IllegalArgumentException("Empty or invalid JWT"));
+                setBadRequestInvalidJwtResponse(response, new BadRequestException("Empty or invalid JWT"));
                 return;
             } else {
                 try {

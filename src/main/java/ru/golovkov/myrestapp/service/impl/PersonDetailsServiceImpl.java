@@ -22,7 +22,7 @@ public class PersonDetailsServiceImpl implements PersonDetailsService {
     public UserDetails loadUserByUsername(String name) throws UsernameNotFoundException {
         Person person = personRepository
                 .findByName(name)
-                .orElseThrow(() -> new PersonNotFoundException(STR."User with name '\{name}' not found"));
+                .orElseThrow(() -> new PersonNotFoundException(STR."No person with name '\{name}' was found"));
         return new PersonDetails(person);
     }
 }

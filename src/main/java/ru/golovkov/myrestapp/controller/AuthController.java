@@ -21,6 +21,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.golovkov.myrestapp.exc.BadRequestException;
 import ru.golovkov.myrestapp.exc.ExceptionDetails;
+import ru.golovkov.myrestapp.exc.WrongPasswordException;
 import ru.golovkov.myrestapp.model.dto.request.PersonAuthRequestDto;
 import ru.golovkov.myrestapp.model.dto.request.PersonRequestDto;
 import ru.golovkov.myrestapp.security.JwtUtil;
@@ -148,7 +149,7 @@ public class AuthController {
         try {
             authenticationManager.authenticate(authToken);
         } catch (BadCredentialsException e) {
-            throw new BadRequestException("Incorrect credentials");
+            throw new WrongPasswordException("Incorrect credentials");
         }
     }
 

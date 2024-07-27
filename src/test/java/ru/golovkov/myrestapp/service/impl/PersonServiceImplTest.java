@@ -14,8 +14,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.golovkov.myrestapp.exc.BadRequestException;
 import ru.golovkov.myrestapp.exc.PersonNotFoundException;
+import ru.golovkov.myrestapp.exc.WrongPasswordException;
 import ru.golovkov.myrestapp.mapper.PersonMapper;
 import ru.golovkov.myrestapp.model.dto.request.PersonRequestDto;
 import ru.golovkov.myrestapp.model.dto.response.PersonResponseDto;
@@ -328,7 +328,7 @@ class PersonServiceImplTest {
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
         when(personRepository.save(any())).thenReturn(mockPerson);
 
-        assertThrows(BadRequestException.class,
+        assertThrows(WrongPasswordException.class,
                 () -> personService.upgradeRole(name, id));
 
         verify(personRepository).findById(id);

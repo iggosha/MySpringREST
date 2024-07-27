@@ -10,7 +10,7 @@ public interface CrudService<R1, R2> {
 
     List<R2> getAll();
 
-    void updateById(R1 reqDto, Long id);
+    void updateById(R1 requestDto, Long id);
 
     void deleteById(Long id);
 }

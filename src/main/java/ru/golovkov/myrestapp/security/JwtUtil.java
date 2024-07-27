@@ -28,6 +28,7 @@ public class JwtUtil {
                 .withClaim(CLAIM_NAME, username)
                 .withIssuer(ISSUER)
                 .withIssuedAt(new Date())
+                .withNotBefore(ZonedDateTime.now().toInstant())
                 .withExpiresAt(expirationDate)
                 .sign(Algorithm.HMAC256(secret));
     }
@@ -38,8 +39,9 @@ public class JwtUtil {
                 .withSubject(SUBJECT)
                 .withIssuer(ISSUER)
                 .build();
-        DecodedJWT decodedJwt = jwtVerifier
-                .verify(token);
-        return decodedJwt.getClaim(CLAIM_NAME).asString();
+        DecodedJWT decodedJwt = jwtVerifier.verify(token);
+        return decodedJwt
+                .getClaim(CLAIM_NAME)
+                .asString();
     }
 }
