@@ -2,27 +2,26 @@ package ru.golovkov.myrestapp.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import ru.golovkov.myrestapp.exc.BadRequestException;
-import ru.golovkov.myrestapp.exc.ExceptionDetails;
-import ru.golovkov.myrestapp.exc.ForbiddenException;
-import ru.golovkov.myrestapp.exc.UnauthorizedException;
+import ru.golovkov.myrestapp.exception.ExceptionDetails;
+import ru.golovkov.myrestapp.exception.httpcommon.BadRequestException;
+import ru.golovkov.myrestapp.exception.httpcommon.ForbiddenException;
+import ru.golovkov.myrestapp.exception.httpcommon.UnauthorizedException;
 import ru.golovkov.myrestapp.model.dto.request.PersonRequestDto;
+import ru.golovkov.myrestapp.model.dto.response.PersonResponseDto;
 import ru.golovkov.myrestapp.service.PersonService;
 
-import java.util.Map;
-
 @RestController
-@RequestMapping("${app.base-url}/admin")
+@RequestMapping("${app.people-url}/admin")
 @SecurityRequirement(name = "Authorization")
 @AllArgsConstructor
 public class AdminController {
@@ -35,14 +34,7 @@ public class AdminController {
                     responseCode = "200",
                     description = "Роль пользователя с указанным ID изменена на ADMIN",
                     content = {@Content(
-                            examples = {
-                                    @ExampleObject(name = "Сообщение об удалении", value = """
-                                            {
-                                              "changed": "role of user with id 1 to admin'"
-                                            }""",
-                                            description = "Сообщение об удалении пользователя с указанием его имени")
-                            },
-                            schema = @Schema(type = "object"),
+                            schema = @Schema(implementation = PersonResponseDto.class),
                             mediaType = MediaType.APPLICATION_JSON_VALUE
                     )}
             ),
@@ -56,27 +48,20 @@ public class AdminController {
             )
     })
     @PutMapping("/upgrade-role")
-    public Map<String, String> upgradeRole(@RequestParam(name = "rawPasswordOfPerson") String rawPasswordOfPerson,
-                                           @RequestParam(name = "id") Long id) {
-        personService.upgradeRole(rawPasswordOfPerson, id);
-        return Map.of("changed", STR."role of user with id \{id} to admin");
+    public PersonResponseDto upgradeRole(@RequestParam(name = "rawPasswordOfPerson") String rawPasswordOfPerson,
+                                         @RequestParam(name = "id") Long id) {
+        return personService.upgradeRole(rawPasswordOfPerson, id);
     }
 
 
+    @SneakyThrows
     @Operation(summary = "Удаление пользователя по имени")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Пользователь с запрашиваемым именем удалён",
+                    description = "Удалённый пользователь",
                     content = {@Content(
-                            examples = {
-                                    @ExampleObject(name = "Сообщение об удалении", value = """
-                                            {
-                                              "deleted": "user with name 'name'"
-                                            }""",
-                                            description = "Сообщение об удалении пользователя с указанием его имени")
-                            },
-                            schema = @Schema(type = "object"),
+                            schema = @Schema(implementation = PersonResponseDto.class),
                             mediaType = MediaType.APPLICATION_JSON_VALUE
                     )}
             ),
@@ -90,9 +75,10 @@ public class AdminController {
             )
     })
     @DeleteMapping("")
-    public Map<String, String> deletePersonByName(@RequestParam(name = "nameToSearch") String name) {
+    public PersonResponseDto deletePersonByName(@RequestParam(name = "nameToSearch") String name) {
+        PersonResponseDto personResponseDto = personService.getByName(name);
         personService.deleteByName(name);
-        return Map.of("deleted", STR."user with name '\{name}'");
+        return personResponseDto;
     }
 
 
@@ -102,14 +88,7 @@ public class AdminController {
                     responseCode = "200",
                     description = "Пользователь изменён",
                     content = {@Content(
-                            examples = {
-                                    @ExampleObject(name = "Сообщение об изменении", value = """
-                                            {
-                                              "changed": "user with id 1"
-                                            }""",
-                                            description = "Сообщение об изменении пользователя с указанием его ID")
-                            },
-                            schema = @Schema(type = "object"),
+                            schema = @Schema(implementation = PersonResponseDto.class),
                             mediaType = MediaType.APPLICATION_JSON_VALUE
                     )}
             ),
@@ -123,10 +102,9 @@ public class AdminController {
             )
     })
     @PutMapping("/{id}")
-    public Map<String, String> updatePersonById(@ParameterObject PersonRequestDto personRequestDto,
-                                                @PathVariable("id") Long id) {
-        personService.updateById(personRequestDto, id);
-        return Map.of("changed", STR."user with id \{id}");
+    public PersonResponseDto updatePersonById(@ParameterObject PersonRequestDto personRequestDto,
+                                              @PathVariable Long id) {
+        return personService.updateById(personRequestDto, id);
     }
 
     @Operation(summary = "Изменение данных пользователя по имени")
@@ -135,14 +113,7 @@ public class AdminController {
                     responseCode = "200",
                     description = "Пользователь с запрашиваемым именем изменён",
                     content = {@Content(
-                            examples = {
-                                    @ExampleObject(name = "Сообщение об изменении", value = """
-                                            {
-                                              "changed": "user with name 'name'"
-                                            }""",
-                                            description = "Сообщение об изменении пользователя с указанием его имени")
-                            },
-                            schema = @Schema(type = "object"),
+                            schema = @Schema(implementation = PersonResponseDto.class),
                             mediaType = MediaType.APPLICATION_JSON_VALUE
                     )}
             ),
@@ -156,26 +127,19 @@ public class AdminController {
             )
     })
     @PutMapping("")
-    public Map<String, String> updatePersonByName(@ParameterObject PersonRequestDto personRequestDto,
-                                                  @RequestParam("nameToSearch") String name) {
-        personService.updateByName(personRequestDto, name);
-        return Map.of("changed", STR."user with name '\{name}'");
+    public PersonResponseDto updatePersonByName(@ParameterObject PersonRequestDto personRequestDto,
+                                                @RequestParam("nameToSearch") String name) {
+        return personService.updateByName(personRequestDto, name);
     }
 
+    @SneakyThrows
     @Operation(summary = "Удаление пользователя по ID")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Пользователь удалён",
+                    description = "Удаленный пользователь",
                     content = {@Content(
-                            examples = {
-                                    @ExampleObject(name = "Сообщение об удалении", value = """
-                                            {
-                                              "deleted": "user with id 1"
-                                            }""",
-                                            description = "Сообщение об удалении пользователя с указанием его ID")
-                            },
-                            schema = @Schema(type = "object"),
+                            schema = @Schema(implementation = PersonResponseDto.class),
                             mediaType = MediaType.APPLICATION_JSON_VALUE
                     )}
             ),
@@ -189,9 +153,10 @@ public class AdminController {
             )
     })
     @DeleteMapping("/{id}")
-    public Map<String, String> deletePersonById(@PathVariable("id") Long id) {
+    public PersonResponseDto deletePersonById(@PathVariable Long id) {
+        PersonResponseDto personResponseDto = personService.getById(id);
         personService.deleteById(id);
-        return Map.of("deleted", STR."user with id \{id}");
+        return personResponseDto;
     }
 
 

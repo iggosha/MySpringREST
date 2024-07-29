@@ -13,11 +13,11 @@ import java.util.List;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface PersonMapper {
 
-    PersonResponseDto toResponseDto(Person person);
+    PersonResponseDto entityToResponseDto(Person entity);
 
-    Person toEntity(PersonRequestDto personRequestDto);
+    Person requestDtoToEntity(PersonRequestDto requestDto);
 
-    List<PersonResponseDto> personListToPersonResponseDtoList(List<Person> personList);
+    List<PersonResponseDto> entityListToResponseDtoList(List<Person> entityList);
 
-    void updateEntityFromRequestDto(@MappingTarget Person person, PersonRequestDto requestDto);
+    void updateEntityFromRequestDto(@MappingTarget Person entity, PersonRequestDto requestDto);
 }

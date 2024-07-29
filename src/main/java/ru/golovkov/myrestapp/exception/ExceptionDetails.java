@@ -1,4 +1,4 @@
-package ru.golovkov.myrestapp.exc;
+package ru.golovkov.myrestapp.exception;
 
 import lombok.Data;
 

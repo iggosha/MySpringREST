@@ -1,9 +1,11 @@
 package ru.golovkov.myrestapp.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "people")
@@ -28,4 +30,12 @@ public class Person {
     private UserRole role;
 
     private LocalDate registrationDate;
+
+    @OneToMany(mappedBy = "sender")
+    @JsonIgnore
+    List<Message> sentMessages;
+
+    @OneToMany(mappedBy = "receiver")
+    @JsonIgnore
+    List<Message> receivedMessages;
 }

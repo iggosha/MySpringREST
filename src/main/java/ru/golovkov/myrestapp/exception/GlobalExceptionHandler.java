@@ -1,4 +1,4 @@
-package ru.golovkov.myrestapp.exc;
+package ru.golovkov.myrestapp.exception;
 
 import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -8,6 +8,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import ru.golovkov.myrestapp.exception.entity.PersonNotFoundException;
+import ru.golovkov.myrestapp.exception.entity.WrongPasswordException;
+import ru.golovkov.myrestapp.exception.httpcommon.BadRequestException;
+import ru.golovkov.myrestapp.exception.httpcommon.ForbiddenException;
 
 @Hidden
 @RestControllerAdvice

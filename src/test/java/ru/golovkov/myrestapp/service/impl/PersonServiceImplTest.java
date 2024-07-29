@@ -14,8 +14,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import ru.golovkov.myrestapp.exc.PersonNotFoundException;
-import ru.golovkov.myrestapp.exc.WrongPasswordException;
+import ru.golovkov.myrestapp.exception.entity.PersonNotFoundException;
+import ru.golovkov.myrestapp.exception.entity.WrongPasswordException;
 import ru.golovkov.myrestapp.mapper.PersonMapper;
 import ru.golovkov.myrestapp.model.dto.request.PersonRequestDto;
 import ru.golovkov.myrestapp.model.dto.response.PersonResponseDto;
@@ -91,119 +91,119 @@ class PersonServiceImplTest {
     @Test
     void create() {
         when(personRepository.save(any())).thenReturn(mockPerson);
-        when(personMapper.toEntity(mockPersonRequestDto)).thenReturn(mockPerson);
+        when(personMapper.requestDtoToEntity(mockPersonRequestDto)).thenReturn(mockPerson);
 
         personService.create(mockPersonRequestDto);
 
         verify(personRepository).save(mockPerson);
-        verify(personMapper).toEntity(mockPersonRequestDto);
+        verify(personMapper).requestDtoToEntity(mockPersonRequestDto);
     }
 
     @Test
     void create_EntityExists_ThrowsDataIntegrityViolationException() {
-        when(personMapper.toEntity(mockPersonRequestDto)).thenReturn(mockPerson);
+        when(personMapper.requestDtoToEntity(mockPersonRequestDto)).thenReturn(mockPerson);
         when(personRepository.save(any())).thenThrow(DataIntegrityViolationException.class);
 
         assertThrows(DataIntegrityViolationException.class,
                 () -> personService.create(mockPersonRequestDto));
 
-        verify(personMapper).toEntity(mockPersonRequestDto);
+        verify(personMapper).requestDtoToEntity(mockPersonRequestDto);
         verify(personRepository).save(mockPerson);
     }
 
     @Test
     void getById() {
         when(personRepository.findById(anyLong())).thenReturn(Optional.of(mockPerson));
-        when(personMapper.toResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
+        when(personMapper.entityToResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
 
         PersonResponseDto personResponseDto = personService.getById(id);
 
         assertEquals(mockPersonResponseDto, personResponseDto);
         verify(personRepository).findById(id);
-        verify(personMapper).toResponseDto(mockPerson);
+        verify(personMapper).entityToResponseDto(mockPerson);
     }
 
     @Test
     void getById_EntityDoesntExist_ThrowsPersonNotFoundException() {
         when(personRepository.findById(anyLong())).thenReturn(Optional.empty());
-        when(personMapper.toResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
+        when(personMapper.entityToResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
 
         assertThrows(PersonNotFoundException.class, () -> personService.getById(id));
 
         verify(personRepository).findById(id);
-        verify(personMapper, never()).toResponseDto(mockPerson);
+        verify(personMapper, never()).entityToResponseDto(mockPerson);
     }
 
     @Test
     void getByName() {
         when(personRepository.findByName(anyString())).thenReturn(Optional.of(mockPerson));
-        when(personMapper.toResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
+        when(personMapper.entityToResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
 
         PersonResponseDto personResponseDto = personService.getByName(name);
 
         assertEquals(mockPersonResponseDto, personResponseDto);
         verify(personRepository).findByName(name);
-        verify(personMapper).toResponseDto(mockPerson);
+        verify(personMapper).entityToResponseDto(mockPerson);
     }
 
     @Test
     void getByName_EntityDoesntExist_ThrowsPersonNotFoundException() {
-        when(personMapper.toResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
+        when(personMapper.entityToResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
         when(personRepository.findByName(anyString())).thenReturn(Optional.empty());
 
         assertThrows(PersonNotFoundException.class, () -> personService.getByName(name));
 
-        verify(personMapper, never()).toResponseDto(mockPerson);
+        verify(personMapper, never()).entityToResponseDto(mockPerson);
         verify(personRepository).findByName(name);
     }
 
     @Test
     void getAll() {
         when(personRepository.findAll()).thenReturn(mockPersonList);
-        when(personMapper.personListToPersonResponseDtoList(mockPersonList)).thenReturn(mockPersonResponseDtoList);
+        when(personMapper.entityListToResponseDtoList(mockPersonList)).thenReturn(mockPersonResponseDtoList);
 
         List<PersonResponseDto> personResponseDtoList = personService.getAll();
 
         assertEquals(mockPersonResponseDtoList, personResponseDtoList);
         verify(personRepository).findAll();
-        verify(personMapper).personListToPersonResponseDtoList(mockPersonList);
+        verify(personMapper).entityListToResponseDtoList(mockPersonList);
 
     }
 
     @Test
     void getAll_EntitiesDontExist_ThrowsPersonNotFoundException() {
-        when(personMapper.personListToPersonResponseDtoList(mockPersonList)).thenReturn(List.of());
+        when(personMapper.entityListToResponseDtoList(mockPersonList)).thenReturn(List.of());
         when(personRepository.findAll()).thenReturn(List.of());
 
         assertThrows(PersonNotFoundException.class, () -> personService.getAll());
 
         verify(personRepository).findAll();
-        verify(personMapper, never()).personListToPersonResponseDtoList(mockPersonList);
+        verify(personMapper, never()).entityListToResponseDtoList(mockPersonList);
     }
 
     @Test
     void getAllByNameContaining() {
         when(personRepository.findAllByNameContainingIgnoreCase(any(), anyString())).thenReturn(mockPersonPage);
-        when(personMapper.personListToPersonResponseDtoList(mockPersonList)).thenReturn(mockPersonResponseDtoList);
+        when(personMapper.entityListToResponseDtoList(mockPersonList)).thenReturn(mockPersonResponseDtoList);
 
         List<PersonResponseDto> personResponseDtoList =
                 personService.getAllByNameContaining(name, pageRequest.getPageNumber(), pageRequest.getPageSize());
 
         assertEquals(mockPersonResponseDtoList, personResponseDtoList);
         verify(personRepository).findAllByNameContainingIgnoreCase(pageRequest, name);
-        verify(personMapper).personListToPersonResponseDtoList(mockPersonList);
+        verify(personMapper).entityListToResponseDtoList(mockPersonList);
     }
 
     @Test
     void getAllByNameContaining_EntitiesDontExist_ThrowsPersonNotFoundException() {
         when(personRepository.findAllByNameContainingIgnoreCase(any(), anyString())).thenReturn(new PageImpl<>(List.of()));
-        when(personMapper.personListToPersonResponseDtoList(mockPersonList)).thenReturn(List.of());
+        when(personMapper.entityListToResponseDtoList(mockPersonList)).thenReturn(List.of());
 
         assertThrows(PersonNotFoundException.class,
                 () -> personService.getAllByNameContaining(name, 1, 10));
 
         verify(personRepository).findAllByNameContainingIgnoreCase(pageRequest, name);
-        verify(personMapper, never()).personListToPersonResponseDtoList(List.of());
+        verify(personMapper, never()).entityListToResponseDtoList(List.of());
     }
 
     @Test

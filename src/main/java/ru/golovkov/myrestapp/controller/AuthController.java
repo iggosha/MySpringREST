@@ -3,36 +3,36 @@ package ru.golovkov.myrestapp.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.golovkov.myrestapp.exc.BadRequestException;
-import ru.golovkov.myrestapp.exc.ExceptionDetails;
-import ru.golovkov.myrestapp.exc.WrongPasswordException;
+import ru.golovkov.myrestapp.exception.ExceptionDetails;
+import ru.golovkov.myrestapp.exception.entity.WrongPasswordException;
+import ru.golovkov.myrestapp.exception.httpcommon.BadRequestException;
 import ru.golovkov.myrestapp.model.dto.request.PersonAuthRequestDto;
 import ru.golovkov.myrestapp.model.dto.request.PersonRequestDto;
+import ru.golovkov.myrestapp.model.dto.response.JwtResponseDto;
+import ru.golovkov.myrestapp.model.dto.response.PersonResponseDto;
+import ru.golovkov.myrestapp.model.entity.Person;
 import ru.golovkov.myrestapp.security.JwtUtil;
 import ru.golovkov.myrestapp.security.PersonDetails;
 import ru.golovkov.myrestapp.service.PersonService;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestController
-@RequestMapping("${app.base-url}")
+@RequestMapping("${app.people-url}")
 @AllArgsConstructor
 public class AuthController {
 
@@ -40,44 +40,30 @@ public class AuthController {
     private final JwtUtil jwtUtil;
     private final AuthenticationManager authenticationManager;
 
+    @SneakyThrows
     @SecurityRequirement(name = "Authorization")
-    @GetMapping("/public/hello")
-    @Operation(summary = "Приветствие пользователя")
+    @GetMapping("/current-user")
+    @Operation(summary = "Получение данных текущего пользователя")
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "200",
-                    description = "Приветствие, либо вывод данных авторизованного пользователя",
+                    description = "Авторизованный пользователь",
                     content = {@Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = {
-                                    @ExampleObject(name = "Приветствие", value = """
-                                            {
-                                              "hello": "user"
-                                            }""",
-                                            description = "Приветствие, если пользователь не авторизован"),
-                                    @ExampleObject(name = "Вывод данных пользователя", value = """
-                                            {
-                                              "role": "[ROLE_ROLE]",
-                                              "encrypted password": "$encrypted$password",
-                                              "name": "name"
-                                            }
-                                            """,
-                                            description = "Данные пользователя, если он авторизован")
-                            },
-                            schema = @Schema(type = "object")
+                            schema = @Schema(implementation = Person.class)
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Пользователь не авторизован",
+                    content = {@Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ExceptionDetails.class)
                     )}
             )
     })
-    public Map<String, String> getHello(Authentication authentication) {
-        if (authentication != null) {
-            PersonDetails principal = (PersonDetails) authentication.getPrincipal();
-            Map<String, String> helloMap = new HashMap<>();
-            helloMap.put("name", principal.getUsername());
-            helloMap.put("role", principal.getAuthorities().toString());
-            helloMap.put("encrypted password", authentication.getCredentials().toString());
-            return helloMap;
-        }
-        return Map.of("hello", "user");
+    public Person getHello(@AuthenticationPrincipal PersonDetails personDetails) {
+        return personDetails.getPerson();
     }
 
     @PostMapping(value = "/public/login")
@@ -88,15 +74,7 @@ public class AuthController {
                     description = "Выполнен вход, выдан JWT",
                     content = {@Content(
                             mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = {@ExampleObject(
-                                    name = "JWT",
-                                    value = """
-                                            {
-                                              "jwt": "json.web.token"
-                                            }""",
-                                    description = "Успешно сгенерированный JWT")
-                            },
-                            schema = @Schema(type = "object")
+                            schema = @Schema(implementation = JwtResponseDto.class)
                     )}
             ),
             @ApiResponse(
@@ -108,13 +86,13 @@ public class AuthController {
                     )}
             )
     })
-    public Map<String, String> postLogin(@Valid @ParameterObject PersonAuthRequestDto personAuthRequestDto) {
+    public JwtResponseDto postLogin(@Valid @ParameterObject PersonAuthRequestDto personAuthRequestDto) {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 personAuthRequestDto.getName(),
                 personAuthRequestDto.getPassword()
         );
         verifyCredentials(authToken);
-        return Map.of("jwt", jwtUtil.generateToken(personAuthRequestDto.getName()));
+        return new JwtResponseDto(jwtUtil.generateToken(personAuthRequestDto.getName()));
     }
 
 
@@ -123,26 +101,16 @@ public class AuthController {
     @ApiResponses(value = {
             @ApiResponse(
                     responseCode = "201",
-                    description = "Выполнена регистрация",
+                    description = "Зарегистрированный пользователь",
                     content = {@Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            examples = {@ExampleObject(
-                                    name = "Созданный пользователь",
-                                    value = """
-                                            {
-                                              "Created user": "PersonRequestDto(name=name, age=1, email=email@email.com, password=1)"
-                                            }""",
-                                    description = "Данные созданного пользователя")
-                            },
-                            schema = @Schema(type = "object")
+                            schema = @Schema(implementation = PersonResponseDto.class)
                     )}
             )
     })
     @ResponseStatus(HttpStatus.CREATED)
     @Validated
-    public Map<String, String> postRegistration(@Valid @ParameterObject PersonRequestDto personRequestDto) {
-        personService.create(personRequestDto);
-        return Map.of("Created user", personRequestDto.toString());
+    public PersonResponseDto postRegistration(@Valid @ParameterObject PersonRequestDto personRequestDto) {
+        return personService.create(personRequestDto);
     }
 
     private void verifyCredentials(UsernamePasswordAuthenticationToken authToken) {

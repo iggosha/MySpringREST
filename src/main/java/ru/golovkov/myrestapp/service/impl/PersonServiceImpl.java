@@ -6,9 +6,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.golovkov.myrestapp.exc.BadRequestException;
-import ru.golovkov.myrestapp.exc.PersonNotFoundException;
-import ru.golovkov.myrestapp.exc.WrongPasswordException;
+import ru.golovkov.myrestapp.exception.httpcommon.BadRequestException;
+import ru.golovkov.myrestapp.exception.entity.PersonNotFoundException;
+import ru.golovkov.myrestapp.exception.entity.WrongPasswordException;
 import ru.golovkov.myrestapp.mapper.PersonMapper;
 import ru.golovkov.myrestapp.model.dto.request.PersonRequestDto;
 import ru.golovkov.myrestapp.model.dto.response.PersonResponseDto;
@@ -32,7 +32,7 @@ public class PersonServiceImpl implements PersonService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public void create(PersonRequestDto personRequestDto) {
+    public PersonResponseDto create(PersonRequestDto personRequestDto) {
         if (personRequestDto.getPassword() == null ||
                 personRequestDto.getAge() == null ||
                 personRequestDto.getEmail() == null ||
@@ -43,23 +43,24 @@ public class PersonServiceImpl implements PersonService {
         ) {
             throw new BadRequestException("All fields must be filled");
         }
-        Person person = personMapper.toEntity(personRequestDto);
+        Person person = personMapper.requestDtoToEntity(personRequestDto);
         person.setRegistrationDate(LocalDate.now());
         person.setRole(UserRole.ROLE_BASE);
         person.setPassword(passwordEncoder.encode(personRequestDto.getPassword()));
-        personRepository.save(person);
+        person = personRepository.save(person);
+        return personMapper.entityToResponseDto(person);
     }
 
     @Transactional(readOnly = true)
     @Override
     public PersonResponseDto getById(Long id) {
-        return personMapper.toResponseDto(getPersonById(id));
+        return personMapper.entityToResponseDto(getPersonById(id));
     }
 
     @Transactional(readOnly = true)
     @Override
     public PersonResponseDto getByName(String name) {
-        return personMapper.toResponseDto(getPersonByName(name));
+        return personMapper.entityToResponseDto(getPersonByName(name));
     }
 
     @Transactional(readOnly = true)
@@ -67,7 +68,7 @@ public class PersonServiceImpl implements PersonService {
     public List<PersonResponseDto> getAll() {
         List<Person> personList = personRepository.findAll();
         checkIfPersonListNotEmpty(personList);
-        return personMapper.personListToPersonResponseDtoList(personList);
+        return personMapper.entityListToResponseDtoList(personList);
     }
 
     @Transactional(readOnly = true)
@@ -84,27 +85,29 @@ public class PersonServiceImpl implements PersonService {
                     .findAllByNameContainingIgnoreCase(pageRequest, name).getContent();
         }
         checkIfPersonListNotEmpty(personList);
-        return personMapper.personListToPersonResponseDtoList(personList);
+        return personMapper.entityListToResponseDtoList(personList);
     }
 
     @Override
-    public void updateById(PersonRequestDto personRequestDto, Long id) {
-        Person personToUpdate = getPersonById(id);
-        personMapper.updateEntityFromRequestDto(personToUpdate, personRequestDto);
+    public PersonResponseDto updateById(PersonRequestDto personRequestDto, Long id) {
+        Person person = getPersonById(id);
+        personMapper.updateEntityFromRequestDto(person, personRequestDto);
         if (personRequestDto.getPassword() != null && !personRequestDto.getPassword().isBlank()) {
-            personToUpdate.setPassword(passwordEncoder.encode(personRequestDto.getPassword()));
+            person.setPassword(passwordEncoder.encode(personRequestDto.getPassword()));
         }
-        personRepository.save(personToUpdate);
+        person = personRepository.save(person);
+        return personMapper.entityToResponseDto(person);
     }
 
     @Override
-    public void updateByName(PersonRequestDto personRequestDto, String name) {
-        Person personToUpdate = getPersonByName(name);
-        personMapper.updateEntityFromRequestDto(personToUpdate, personRequestDto);
+    public PersonResponseDto updateByName(PersonRequestDto personRequestDto, String name) {
+        Person person = getPersonByName(name);
+        personMapper.updateEntityFromRequestDto(person, personRequestDto);
         if (personRequestDto.getPassword() != null && !personRequestDto.getPassword().isBlank()) {
-            personToUpdate.setPassword(passwordEncoder.encode(personRequestDto.getPassword()));
+            person.setPassword(passwordEncoder.encode(personRequestDto.getPassword()));
         }
-        personRepository.save(personToUpdate);
+        person = personRepository.save(person);
+        return personMapper.entityToResponseDto(person);
     }
 
     @Override
@@ -120,14 +123,15 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public void upgradeRole(String rawPassword, Long id) {
+    public PersonResponseDto upgradeRole(String rawPassword, Long id) {
         Person person = getPersonById(id);
         if (passwordEncoder.matches(rawPassword, person.getPassword())) {
             person.setRole(UserRole.ROLE_ADMIN);
         } else {
             throw new WrongPasswordException();
         }
-        personRepository.save(person);
+        person = personRepository.save(person);
+        return personMapper.entityToResponseDto(person);
     }
 
     private void checkIfPersonExistsById(Long id) {

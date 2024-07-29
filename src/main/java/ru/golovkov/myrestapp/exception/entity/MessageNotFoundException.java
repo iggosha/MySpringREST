@@ -1,12 +1,13 @@
-package ru.golovkov.myrestapp.exc;
+package ru.golovkov.myrestapp.exception.entity;
+
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
-public class PersonNotFoundException extends RuntimeException{
+public class MessageNotFoundException extends RuntimeException {
 
-    public PersonNotFoundException(String message) {
+    public MessageNotFoundException(String message) {
         super(message);
     }
 }

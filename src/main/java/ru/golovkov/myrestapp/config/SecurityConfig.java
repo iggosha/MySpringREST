@@ -31,7 +31,7 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authEntryPoint;
     private final JwtFilter jwtFilter;
 
-    @Value("${app.base-url}")
+    @Value("${app.people-url}")
     private String baseUrl;
 
     @Bean

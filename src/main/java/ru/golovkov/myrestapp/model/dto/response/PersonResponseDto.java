@@ -1,5 +1,6 @@
 package ru.golovkov.myrestapp.model.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -19,5 +20,6 @@ public class PersonResponseDto {
 
     private String role;
 
+    @JsonFormat(pattern = "dd.MM.YYYY")
     private LocalDate registrationDate;
 }

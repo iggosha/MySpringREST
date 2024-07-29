@@ -1,4 +1,4 @@
-package ru.golovkov.myrestapp.exc;
+package ru.golovkov.myrestapp.exception.httpcommon;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;

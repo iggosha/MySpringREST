@@ -14,8 +14,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.golovkov.myrestapp.exc.BadRequestException;
-import ru.golovkov.myrestapp.exc.ExceptionDetails;
+import ru.golovkov.myrestapp.exception.httpcommon.BadRequestException;
+import ru.golovkov.myrestapp.exception.ExceptionDetails;
 import ru.golovkov.myrestapp.service.PersonDetailsService;
 
 import java.io.IOException;

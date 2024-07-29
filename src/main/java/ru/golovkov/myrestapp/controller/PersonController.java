@@ -10,16 +10,16 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import ru.golovkov.myrestapp.exc.BadRequestException;
-import ru.golovkov.myrestapp.exc.ExceptionDetails;
-import ru.golovkov.myrestapp.exc.UnauthorizedException;
+import ru.golovkov.myrestapp.exception.httpcommon.BadRequestException;
+import ru.golovkov.myrestapp.exception.ExceptionDetails;
+import ru.golovkov.myrestapp.exception.httpcommon.UnauthorizedException;
 import ru.golovkov.myrestapp.model.dto.response.PersonResponseDto;
 import ru.golovkov.myrestapp.service.PersonService;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("${app.base-url}")
+@RequestMapping("${app.people-url}")
 @SecurityRequirement(name = "Authorization")
 @AllArgsConstructor
 public class PersonController {
@@ -73,7 +73,7 @@ public class PersonController {
             )
     })
     @GetMapping("/{id}")
-    public PersonResponseDto getPersonById(@PathVariable("id") Long id) {
+    public PersonResponseDto getPersonById(@PathVariable Long id) {
         return personService.getById(id);
     }
 
