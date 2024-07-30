@@ -82,7 +82,9 @@ public class MessageServiceImpl implements MessageService {
     public MessageResponseDto updateById(MessageRequestDto requestDto, Long messageId) {
         Message message = getMessageById(messageId);
         if (!message.getSender().getId().equals(requestDto.getSenderId())) {
-            throw new ForbiddenException(STR."Another sender's messages aren't available for editing! Current user's ID: \{message.getSender().getId()}, sender's ID: \{requestDto.getSenderId()}");
+            throw new ForbiddenException(STR.
+                    "Another sender's messages aren't available for editing! Current user's ID: \{
+                            message.getSender().getId()}, sender's ID: \{requestDto.getSenderId()}");
         }
         messageMapper.updateEntityFromRequestDto(message, requestDto);
         message = messageRepository.save(message);

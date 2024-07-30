@@ -39,7 +39,7 @@ public class MessageController {
     @GetMapping("/with/{senderId}")
     public List<MessageResponseDto> getMessageListWithSenderByIds(@PathVariable Long senderId,
                                                                   @AuthenticationPrincipal PersonDetails personDetails,
-                                                                  @ParameterObject @PageableDefault(sort = "sentAt", direction = Sort.Direction.DESC) Pageable pageable) {
+    @ParameterObject @PageableDefault(sort = "sentAt", direction = Sort.Direction.DESC) Pageable pageable) {
         Long principalId = personDetails.getPerson().getId();
         return messageService.getListWithSenderByIds(principalId, senderId, pageable).reversed();
     }
@@ -60,7 +60,8 @@ public class MessageController {
         MessageResponseDto messageResponseDto = messageService.getById(id);
         if (!messageResponseDto.getSenderId().equals(principalId)) {
             throw new ForbiddenException(STR
-                    ."Another sender's messages aren't available for deleting! Current user's ID: \{principalId}, sender's ID: \{messageResponseDto.getSenderId()})}");
+                    ."Another sender's messages aren't available for deleting! Current user's ID: \{
+                    principalId}, sender's ID: \{messageResponseDto.getSenderId()})}");
         }
         messageService.deleteById(id);
         return messageResponseDto;

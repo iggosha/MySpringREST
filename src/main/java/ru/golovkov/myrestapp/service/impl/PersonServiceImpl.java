@@ -1,14 +1,13 @@
 package ru.golovkov.myrestapp.service.impl;
 
 import lombok.AllArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.golovkov.myrestapp.exception.httpcommon.BadRequestException;
 import ru.golovkov.myrestapp.exception.entity.PersonNotFoundException;
 import ru.golovkov.myrestapp.exception.entity.WrongPasswordException;
+import ru.golovkov.myrestapp.exception.httpcommon.BadRequestException;
 import ru.golovkov.myrestapp.mapper.PersonMapper;
 import ru.golovkov.myrestapp.model.dto.request.PersonRequestDto;
 import ru.golovkov.myrestapp.model.dto.response.PersonResponseDto;
@@ -73,16 +72,13 @@ public class PersonServiceImpl implements PersonService {
 
     @Transactional(readOnly = true)
     @Override
-    public List<PersonResponseDto> getAllByNameContaining(String name, int pageNumber, int pageSize) {
-        PageRequest pageRequest;
+    public List<PersonResponseDto> getAllByNameContaining(String name, Pageable pageable) {
         List<Person> personList;
         if (name == null || name.isBlank()) {
-            pageRequest = PageRequest.of(pageNumber, pageSize);
-            personList = personRepository.findAll(pageRequest).getContent();
+            personList = personRepository.findAll(pageable).getContent();
         } else {
-            pageRequest = PageRequest.of(pageNumber, pageSize, Sort.by(Sort.Direction.ASC, "name"));
             personList = personRepository
-                    .findAllByNameContainingIgnoreCase(pageRequest, name).getContent();
+                    .findAllByNameContainingIgnoreCase(pageable, name).getContent();
         }
         checkIfPersonListNotEmpty(personList);
         return personMapper.entityListToResponseDtoList(personList);

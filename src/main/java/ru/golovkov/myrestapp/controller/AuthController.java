@@ -62,7 +62,7 @@ public class AuthController {
                     )}
             )
     })
-    public Person getHello(@AuthenticationPrincipal PersonDetails personDetails) {
+    public Person getCurrentUser(@AuthenticationPrincipal PersonDetails personDetails) {
         return personDetails.getPerson();
     }
 
@@ -98,15 +98,13 @@ public class AuthController {
 
     @PostMapping("/public/registration")
     @Operation(summary = "Регистрация")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "Зарегистрированный пользователь",
-                    content = {@Content(
-                            schema = @Schema(implementation = PersonResponseDto.class)
-                    )}
-            )
-    })
+    @ApiResponse(
+            responseCode = "201",
+            description = "Зарегистрированный пользователь",
+            content = {@Content(
+                    schema = @Schema(implementation = PersonResponseDto.class)
+            )}
+    )
     @ResponseStatus(HttpStatus.CREATED)
     @Validated
     public PersonResponseDto postRegistration(@Valid @ParameterObject PersonRequestDto personRequestDto) {

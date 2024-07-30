@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import ru.golovkov.myrestapp.exception.httpcommon.ForbiddenException;
 import ru.golovkov.myrestapp.model.dto.response.MessageResponseDto;
 import ru.golovkov.myrestapp.security.PersonDetails;
 import ru.golovkov.myrestapp.service.MessageService;
@@ -22,8 +23,16 @@ public class MessageSearchController {
     private final MessageService messageService;
 
     @GetMapping("/{id}")
-    public MessageResponseDto getMessageById(@PathVariable Long id) {
-        return messageService.getById(id);
+    public MessageResponseDto getMessageById(@PathVariable Long id,
+                                             @AuthenticationPrincipal PersonDetails personDetails) {
+        Long principalId = personDetails.getPerson().getId();
+        MessageResponseDto messageResponseDto = messageService.getById(id);
+        if (!messageResponseDto.getSenderId().equals(principalId)) {
+            throw new ForbiddenException(STR.
+                    "Another sender's messages aren't available for searching by ID! Current user's ID: \{
+                            principalId}, sender's ID: \{messageResponseDto.getSenderId()}");
+        }
+        return messageResponseDto;
     }
 
     @GetMapping("/from/{senderId}")

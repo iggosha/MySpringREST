@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
@@ -13,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import ru.golovkov.myrestapp.exception.ExceptionDetails;
+import ru.golovkov.myrestapp.exception.entity.PersonNotFoundException;
 import ru.golovkov.myrestapp.exception.httpcommon.BadRequestException;
 import ru.golovkov.myrestapp.exception.httpcommon.ForbiddenException;
 import ru.golovkov.myrestapp.exception.httpcommon.UnauthorizedException;
@@ -24,29 +24,19 @@ import ru.golovkov.myrestapp.service.PersonService;
 @RequestMapping("${app.people-url}/admin")
 @SecurityRequirement(name = "Authorization")
 @AllArgsConstructor
-public class AdminController {
+public class PersonAdminController {
 
     private final PersonService personService;
 
     @Operation(summary = "Удаление пользователя по имени")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Роль пользователя с указанным ID изменена на ADMIN",
-                    content = {@Content(
-                            schema = @Schema(implementation = PersonResponseDto.class),
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
-                    )}
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Не найден пользователь с таким ID",
-                    content = {@Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ExceptionDetails.class)
-                    )}
-            )
-    })
+    @ApiResponse(
+            responseCode = "200",
+            description = "Роль пользователя с указанным ID изменена на ADMIN",
+            content = {@Content(
+                    schema = @Schema(implementation = PersonResponseDto.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE
+            )}
+    )
     @PutMapping("/upgrade-role")
     public PersonResponseDto upgradeRole(@RequestParam(name = "rawPasswordOfPerson") String rawPasswordOfPerson,
                                          @RequestParam(name = "id") Long id) {
@@ -56,24 +46,14 @@ public class AdminController {
 
     @SneakyThrows
     @Operation(summary = "Удаление пользователя по имени")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Удалённый пользователь",
-                    content = {@Content(
-                            schema = @Schema(implementation = PersonResponseDto.class),
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
-                    )}
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Не найден пользователь с таким именем",
-                    content = {@Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ExceptionDetails.class)
-                    )}
-            )
-    })
+    @ApiResponse(
+            responseCode = "200",
+            description = "Удалённый пользователь",
+            content = {@Content(
+                    schema = @Schema(implementation = PersonResponseDto.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE
+            )}
+    )
     @DeleteMapping("")
     public PersonResponseDto deletePersonByName(@RequestParam(name = "nameToSearch") String name) {
         PersonResponseDto personResponseDto = personService.getByName(name);
@@ -83,24 +63,14 @@ public class AdminController {
 
 
     @Operation(summary = "Изменение данных пользователя по ID")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Пользователь изменён",
-                    content = {@Content(
-                            schema = @Schema(implementation = PersonResponseDto.class),
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
-                    )}
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Не найден пользователь с таким ID",
-                    content = {@Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ExceptionDetails.class)
-                    )}
-            )
-    })
+    @ApiResponse(
+            responseCode = "200",
+            description = "Пользователь изменён",
+            content = {@Content(
+                    schema = @Schema(implementation = PersonResponseDto.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE
+            )}
+    )
     @PutMapping("/{id}")
     public PersonResponseDto updatePersonById(@ParameterObject PersonRequestDto personRequestDto,
                                               @PathVariable Long id) {
@@ -108,24 +78,14 @@ public class AdminController {
     }
 
     @Operation(summary = "Изменение данных пользователя по имени")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Пользователь с запрашиваемым именем изменён",
-                    content = {@Content(
-                            schema = @Schema(implementation = PersonResponseDto.class),
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
-                    )}
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Не найден пользователь с таким именем",
-                    content = {@Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ExceptionDetails.class)
-                    )}
-            )
-    })
+    @ApiResponse(
+            responseCode = "200",
+            description = "Пользователь с запрашиваемым именем изменён",
+            content = {@Content(
+                    schema = @Schema(implementation = PersonResponseDto.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE
+            )}
+    )
     @PutMapping("")
     public PersonResponseDto updatePersonByName(@ParameterObject PersonRequestDto personRequestDto,
                                                 @RequestParam("nameToSearch") String name) {
@@ -134,24 +94,14 @@ public class AdminController {
 
     @SneakyThrows
     @Operation(summary = "Удаление пользователя по ID")
-    @ApiResponses(value = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Удаленный пользователь",
-                    content = {@Content(
-                            schema = @Schema(implementation = PersonResponseDto.class),
-                            mediaType = MediaType.APPLICATION_JSON_VALUE
-                    )}
-            ),
-            @ApiResponse(
-                    responseCode = "404",
-                    description = "Не найден пользователь с таким ID",
-                    content = {@Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation = ExceptionDetails.class)
-                    )}
-            )
-    })
+    @ApiResponse(
+            responseCode = "200",
+            description = "Удаленный пользователь",
+            content = {@Content(
+                    schema = @Schema(implementation = PersonResponseDto.class),
+                    mediaType = MediaType.APPLICATION_JSON_VALUE
+            )}
+    )
     @DeleteMapping("/{id}")
     public PersonResponseDto deletePersonById(@PathVariable Long id) {
         PersonResponseDto personResponseDto = personService.getById(id);
@@ -199,6 +149,20 @@ public class AdminController {
     @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public ExceptionDetails handleForbiddenException(ForbiddenException e) {
+        return new ExceptionDetails(e.toString());
+    }
+
+    @ApiResponse(
+            responseCode = "404",
+            description = "Ни одного пользователя не найдено",
+            content = {@Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ExceptionDetails.class)
+            )}
+    )
+    @ExceptionHandler(PersonNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ExceptionDetails handlePersonNotFoundException(PersonNotFoundException e) {
         return new ExceptionDetails(e.toString());
     }
 }

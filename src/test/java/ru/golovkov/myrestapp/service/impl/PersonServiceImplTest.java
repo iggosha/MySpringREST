@@ -90,13 +90,17 @@ class PersonServiceImplTest {
 
     @Test
     void create() {
-        when(personRepository.save(any())).thenReturn(mockPerson);
         when(personMapper.requestDtoToEntity(mockPersonRequestDto)).thenReturn(mockPerson);
+        when(personRepository.save(any())).thenReturn(mockPerson);
+        when(personMapper.entityToResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
 
-        personService.create(mockPersonRequestDto);
+        PersonResponseDto personResponseDto = personService.create(mockPersonRequestDto);
 
-        verify(personRepository).save(mockPerson);
+        assertEquals(mockPersonResponseDto, personResponseDto);
+
         verify(personMapper).requestDtoToEntity(mockPersonRequestDto);
+        verify(personRepository).save(mockPerson);
+        verify(personMapper).entityToResponseDto(mockPerson);
     }
 
     @Test
@@ -167,7 +171,6 @@ class PersonServiceImplTest {
         assertEquals(mockPersonResponseDtoList, personResponseDtoList);
         verify(personRepository).findAll();
         verify(personMapper).entityListToResponseDtoList(mockPersonList);
-
     }
 
     @Test
@@ -187,7 +190,7 @@ class PersonServiceImplTest {
         when(personMapper.entityListToResponseDtoList(mockPersonList)).thenReturn(mockPersonResponseDtoList);
 
         List<PersonResponseDto> personResponseDtoList =
-                personService.getAllByNameContaining(name, pageRequest.getPageNumber(), pageRequest.getPageSize());
+                personService.getAllByNameContaining(name, pageRequest);
 
         assertEquals(mockPersonResponseDtoList, personResponseDtoList);
         verify(personRepository).findAllByNameContainingIgnoreCase(pageRequest, name);
@@ -200,7 +203,7 @@ class PersonServiceImplTest {
         when(personMapper.entityListToResponseDtoList(mockPersonList)).thenReturn(List.of());
 
         assertThrows(PersonNotFoundException.class,
-                () -> personService.getAllByNameContaining(name, 1, 10));
+                () -> personService.getAllByNameContaining(name, pageRequest));
 
         verify(personRepository).findAllByNameContainingIgnoreCase(pageRequest, name);
         verify(personMapper, never()).entityListToResponseDtoList(List.of());
@@ -208,13 +211,15 @@ class PersonServiceImplTest {
 
     @Test
     void updateById() {
-        when(personRepository.save(any())).thenReturn(mockPerson);
         when(personRepository.findById(anyLong())).thenReturn(Optional.of(mockPerson));
+        when(personRepository.save(any())).thenReturn(mockPerson);
+        when(personMapper.entityToResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
 
-        personService.updateById(mockPersonRequestDto, id);
+        PersonResponseDto personResponseDto = personService.updateById(mockPersonRequestDto, id);
 
-        verify(personRepository).save(mockPerson);
+        assertEquals(mockPersonResponseDto, personResponseDto);
         verify(personRepository).findById(id);
+        verify(personRepository).save(mockPerson);
         verify(personMapper).updateEntityFromRequestDto(mockPerson, mockPersonRequestDto);
     }
 
@@ -233,11 +238,13 @@ class PersonServiceImplTest {
 
     @Test
     void updateByName() {
-        when(personRepository.save(any())).thenReturn(mockPerson);
         when(personRepository.findByName(anyString())).thenReturn(Optional.of(mockPerson));
+        when(personRepository.save(any())).thenReturn(mockPerson);
+        when(personMapper.entityToResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
 
-        personService.updateByName(mockPersonRequestDto, name);
+        PersonResponseDto personResponseDto = personService.updateByName(mockPersonRequestDto, name);
 
+        assertEquals(mockPersonResponseDto, personResponseDto);
         verify(personRepository).save(mockPerson);
         verify(personRepository).findByName(name);
         verify(personMapper).updateEntityFromRequestDto(mockPerson, mockPersonRequestDto);
@@ -299,9 +306,11 @@ class PersonServiceImplTest {
         when(personRepository.findById(anyLong())).thenReturn(Optional.of(mockPerson));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(personRepository.save(any())).thenReturn(mockPerson);
+        when(personMapper.entityToResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
 
-        personService.upgradeRole(name, id);
+        PersonResponseDto personResponseDto = personService.upgradeRole(name, id);
         assertEquals(UserRole.ROLE_ADMIN, mockPerson.getRole());
+        assertEquals(mockPersonResponseDto, personResponseDto);
 
         verify(personRepository).findById(id);
         verify(passwordEncoder).matches(name, mockPerson.getPassword());

@@ -1,5 +1,6 @@
 package ru.golovkov.myrestapp.service;
 
+import org.springframework.data.domain.Pageable;
 import ru.golovkov.myrestapp.model.dto.request.PersonRequestDto;
 import ru.golovkov.myrestapp.model.dto.response.PersonResponseDto;
 
@@ -9,7 +10,7 @@ public interface PersonService extends CrudService<PersonRequestDto, PersonRespo
 
     PersonResponseDto getByName(String name);
 
-    List<PersonResponseDto> getAllByNameContaining(String name, int pageNumber, int pageSize);
+    List<PersonResponseDto> getAllByNameContaining(String name, Pageable pageable);
 
     PersonResponseDto updateByName(PersonRequestDto personRequestDto, String name);
 
