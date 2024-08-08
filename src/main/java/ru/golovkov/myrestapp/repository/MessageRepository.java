@@ -23,7 +23,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             "JOIN m.receiver r " +
             "WHERE (s.id = :senderId AND r.id = :receiverId) " +
             "OR (s.id = :receiverId AND r.id = :senderId)")
-    Page<Message> getPageWithSenderByIds(@Param("receiverId") Long receiverId,
+    Page<Message> findAllWithSenderByIds(@Param("receiverId") Long receiverId,
                                          @Param("senderId") Long senderId,
                                          Pageable pageable);
 
@@ -32,7 +32,7 @@ public interface MessageRepository extends JpaRepository<Message, Long> {
             "JOIN m.receiver r " +
             "WHERE (s.id = :senderId AND r.id = :receiverId)  AND m.content LIKE %:content% " +
             "OR (s.id = :receiverId AND r.id = :senderId) AND m.content LIKE %:content%")
-    Page<Message> getPageWithSenderByIdsAndContent(@Param("receiverId") Long receiverId,
+    Page<Message> findAllWithSenderByIdsAndContent(@Param("receiverId") Long receiverId,
                                                    @Param("senderId") Long senderId,
                                                    @Param("content") String content,
                                                    Pageable pageable);

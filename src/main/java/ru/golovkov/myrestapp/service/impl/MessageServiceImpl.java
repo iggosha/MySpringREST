@@ -39,7 +39,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public List<MessageResponseDto> getAll() {
-        return messageMapper.entityListToResponseDtoList(messageRepository.findAll());
+        List<Message> messageList = messageRepository.findAll();
+        throwExceptionIfMessageListIsEmpty(messageList);
+        return messageMapper.entityListToResponseDtoList(messageList);
     }
 
     @Transactional(readOnly = true)
@@ -48,6 +50,7 @@ public class MessageServiceImpl implements MessageService {
         List<Message> messageList = messageRepository
                 .findAllByReceiver_IdAndSender_IdAndContentContainingIgnoreCase(receiverId, senderId, content, pageable)
                 .toList();
+        throwExceptionIfMessageListIsEmpty(messageList);
         return messageMapper.entityListToResponseDtoList(messageList);
     }
 
@@ -55,8 +58,9 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public List<MessageResponseDto> getListWithSenderByIdsAndContent(Long receiverId, Long senderId, String content, Pageable pageable) {
         List<Message> messageList = messageRepository
-                .getPageWithSenderByIdsAndContent(receiverId, senderId, content, pageable)
-                .stream().toList();
+                .findAllWithSenderByIdsAndContent(receiverId, senderId, content, pageable)
+                .toList();
+        throwExceptionIfMessageListIsEmpty(messageList);
         return messageMapper.entityListToResponseDtoList(messageList);
     }
 
@@ -66,6 +70,7 @@ public class MessageServiceImpl implements MessageService {
         List<Message> messageList = messageRepository
                 .findAllByReceiver_IdAndSender_Id(receiverId, senderId, pageable)
                 .toList();
+        throwExceptionIfMessageListIsEmpty(messageList);
         return messageMapper.entityListToResponseDtoList(messageList);
     }
 
@@ -73,8 +78,9 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public List<MessageResponseDto> getListWithSenderByIds(Long receiverId, Long senderId, Pageable pageable) {
         List<Message> messageList = messageRepository
-                .getPageWithSenderByIds(receiverId, senderId, pageable)
+                .findAllWithSenderByIds(receiverId, senderId, pageable)
                 .toList();
+        throwExceptionIfMessageListIsEmpty(messageList);
         return messageMapper.entityListToResponseDtoList(messageList);
     }
 
@@ -93,7 +99,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void deleteById(Long id) {
-        checkIfMessageExistsById(id);
+        throwExceptionIfNoMessageExistsById(id);
         messageRepository.deleteById(id);
     }
 
@@ -103,9 +109,15 @@ public class MessageServiceImpl implements MessageService {
                 .orElseThrow(() -> new MessageNotFoundException(STR."No message with id \{id} was found"));
     }
 
-    private void checkIfMessageExistsById(Long id) {
+    private void throwExceptionIfNoMessageExistsById(Long id) {
         if (!messageRepository.existsById(id)) {
             throw new MessageNotFoundException(STR."No message with id \{id} was found");
+        }
+    }
+
+    private void throwExceptionIfMessageListIsEmpty(List<Message> messageList) {
+        if (messageList.isEmpty()) {
+            throw new MessageNotFoundException("No message was found");
         }
     }
 }

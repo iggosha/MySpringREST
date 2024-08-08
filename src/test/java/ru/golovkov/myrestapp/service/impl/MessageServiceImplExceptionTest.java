@@ -5,10 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import ru.golovkov.myrestapp.exception.entity.MessageNotFoundException;
 import ru.golovkov.myrestapp.mapper.MessageMapper;
 import ru.golovkov.myrestapp.model.dto.request.MessageRequestDto;
 import ru.golovkov.myrestapp.model.dto.response.MessageResponseDto;
@@ -22,20 +23,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest
-class MessageServiceImplTest {
+class MessageServiceImplExceptionTest {
 
     private static Message mockMessage;
     private static MessageRequestDto mockMessageRequestDto;
     private static MessageResponseDto mockMessageResponseDto;
     private static List<Message> mockMessageList;
     private static List<MessageResponseDto> mockMessageResponseDtoList;
-    private static Page<Message> mockMessagePage;
     private static Long id;
     private static Long senderId;
     private static Long receiverId;
@@ -78,64 +77,59 @@ class MessageServiceImplTest {
 
         mockMessageList = new ArrayList<>(List.of(mockMessage));
         mockMessageResponseDtoList = new ArrayList<>(List.of(mockMessageResponseDto));
-        mockMessagePage = new PageImpl<>(mockMessageList);
     }
 
     @Test
-    void create() {
-        when(messageMapper.requestDtoToEntity(mockMessageRequestDto)).thenReturn(mockMessage);
-        when(messageRepository.save(any())).thenReturn(mockMessage);
-        when(messageMapper.entityToResponseDto(mockMessage)).thenReturn(mockMessageResponseDto);
+    void create_EntityExists_ThrowsDataIntegrityViolationException() {
+        when(messageMapper.requestDtoToEntity(any())).thenReturn(mockMessage);
+        when(messageRepository.save(any())).thenThrow(DataIntegrityViolationException.class);
 
-        MessageResponseDto messageResponseDto = messageService.create(mockMessageRequestDto);
+        assertThrows(DataIntegrityViolationException.class,
+                () -> messageService.create(mockMessageRequestDto));
 
-        assertEquals(mockMessageResponseDto, messageResponseDto);
         verify(messageMapper).requestDtoToEntity(mockMessageRequestDto);
         verify(messageRepository).save(mockMessage);
-        verify(messageMapper).entityToResponseDto(mockMessage);
+        verify(messageMapper, never()).entityToResponseDto(any());
     }
 
     @Test
-    void getById() {
-        when(messageRepository.findById(anyLong())).thenReturn(Optional.of(mockMessage));
-        when(messageMapper.entityToResponseDto(mockMessage)).thenReturn(mockMessageResponseDto);
+    void getById_EntityDoesntExist_ThrowsPersonNotFoundException() {
+        when(messageRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(messageMapper.entityToResponseDto(any())).thenReturn(mockMessageResponseDto);
 
-        MessageResponseDto messageResponseDto = messageService.getById(id);
+        assertThrows(MessageNotFoundException.class, () -> messageService.getById(id));
 
-        assertEquals(mockMessageResponseDto, messageResponseDto);
         verify(messageRepository).findById(senderId);
-        verify(messageMapper).entityToResponseDto(mockMessage);
+        verify(messageMapper, never()).entityToResponseDto(mockMessage);
     }
 
     @Test
-    void getAll() {
-        when(messageRepository.findAll()).thenReturn(mockMessageList);
-        when(messageMapper.entityListToResponseDtoList(mockMessageList)).thenReturn(mockMessageResponseDtoList);
+    void getAll_EntitiesDontExist_ThrowsPersonNotFoundException() {
+        when(messageRepository.findAll()).thenReturn(List.of());
+        when(messageMapper.entityListToResponseDtoList(anyList())).thenReturn(List.of());
 
-        List<MessageResponseDto> messageResponseDtoList = messageService.getAll();
+        assertThrows(MessageNotFoundException.class, () -> messageService.getAll());
 
-        assertEquals(mockMessageResponseDtoList, messageResponseDtoList);
         verify(messageRepository).findAll();
-        verify(messageMapper).entityListToResponseDtoList(mockMessageList);
+        verify(messageMapper, never()).entityListToResponseDtoList(mockMessageList);
     }
 
     @Test
-    void getListFromSenderByIdAndContent() {
+    void getListFromSenderByIdAndContent_EntitiesDontExist_ThrowsPersonNotFoundException() {
         when(messageRepository
                 .findAllByReceiver_IdAndSender_IdAndContentContainingIgnoreCase(
                         anyLong(),
                         anyLong(),
                         anyString(),
                         any()))
-                .thenReturn(mockMessagePage);
-        when(messageMapper.entityListToResponseDtoList(mockMessageList)).thenReturn(mockMessageResponseDtoList);
+                .thenReturn(Page.empty());
+        when(messageMapper.entityListToResponseDtoList(anyList())).thenReturn(mockMessageResponseDtoList);
 
-        List<MessageResponseDto> messageResponseDtoList =
-                messageService.getListFromSenderByIdAndContent(receiverId, senderId, content, pageRequest);
+        assertThrows(MessageNotFoundException.class,
+                () -> messageService.getListFromSenderByIdAndContent(receiverId, senderId, content, pageRequest));
 
-        assertEquals(mockMessageResponseDtoList, messageResponseDtoList);
         verify(messageRepository).findAllByReceiver_IdAndSender_IdAndContentContainingIgnoreCase(receiverId, senderId, content, pageRequest);
-        verify(messageMapper).entityListToResponseDtoList(mockMessageList);
+        verify(messageMapper, never()).entityListToResponseDtoList(mockMessageList);
     }
 
     @Test
@@ -146,15 +140,14 @@ class MessageServiceImplTest {
                         anyLong(),
                         anyString(),
                         any()))
-                .thenReturn(mockMessagePage);
-        when(messageMapper.entityListToResponseDtoList(mockMessageList)).thenReturn(mockMessageResponseDtoList);
+                .thenReturn(Page.empty());
+        when(messageMapper.entityListToResponseDtoList(anyList())).thenReturn(mockMessageResponseDtoList);
 
-        List<MessageResponseDto> messageResponseDtoList =
-                messageService.getListWithSenderByIdsAndContent(receiverId, senderId, content, pageRequest);
+        assertThrows(MessageNotFoundException.class,
+                () -> messageService.getListWithSenderByIdsAndContent(receiverId, senderId, content, pageRequest));
 
-        assertEquals(mockMessageResponseDtoList, messageResponseDtoList);
         verify(messageRepository).findAllWithSenderByIdsAndContent(receiverId, senderId, content, pageRequest);
-        verify(messageMapper).entityListToResponseDtoList(mockMessageList);
+        verify(messageMapper, never()).entityListToResponseDtoList(mockMessageList);
     }
 
     @Test
@@ -164,15 +157,14 @@ class MessageServiceImplTest {
                         anyLong(),
                         anyLong(),
                         any()))
-                .thenReturn(mockMessagePage);
-        when(messageMapper.entityListToResponseDtoList(mockMessageList)).thenReturn(mockMessageResponseDtoList);
+                .thenReturn(Page.empty());
+        when(messageMapper.entityListToResponseDtoList(anyList())).thenReturn(mockMessageResponseDtoList);
 
-        List<MessageResponseDto> messageResponseDtoList =
-                messageService.getListFromSenderById(receiverId, senderId, pageRequest);
+        assertThrows(MessageNotFoundException.class,
+                () -> messageService.getListFromSenderById(receiverId, senderId, pageRequest));
 
-        assertEquals(mockMessageResponseDtoList, messageResponseDtoList);
         verify(messageRepository).findAllByReceiver_IdAndSender_Id(receiverId, senderId, pageRequest);
-        verify(messageMapper).entityListToResponseDtoList(mockMessageList);
+        verify(messageMapper, never()).entityListToResponseDtoList(mockMessageList);
     }
 
     @Test
@@ -182,37 +174,37 @@ class MessageServiceImplTest {
                         anyLong(),
                         anyLong(),
                         any()))
-                .thenReturn(mockMessagePage);
-        when(messageMapper.entityListToResponseDtoList(mockMessageList)).thenReturn(mockMessageResponseDtoList);
+                .thenReturn(Page.empty());
+        when(messageMapper.entityListToResponseDtoList(anyList())).thenReturn(mockMessageResponseDtoList);
 
-        List<MessageResponseDto> messageResponseDtoList =
-                messageService.getListWithSenderByIds(receiverId, senderId, pageRequest);
+        assertThrows(MessageNotFoundException.class,
+                () -> messageService.getListWithSenderByIds(receiverId, senderId, pageRequest));
 
-        assertEquals(mockMessageResponseDtoList, messageResponseDtoList);
         verify(messageRepository).findAllWithSenderByIds(receiverId, senderId, pageRequest);
-        verify(messageMapper).entityListToResponseDtoList(mockMessageList);
+        verify(messageMapper, never()).entityListToResponseDtoList(mockMessageList);
     }
 
     @Test
     void updateById() {
-        when(messageRepository.findById(anyLong())).thenReturn(Optional.of(mockMessage));
+        when(messageRepository.findById(anyLong())).thenReturn(Optional.empty());
         when(messageRepository.save(any())).thenReturn(mockMessage);
-        when(messageMapper.entityToResponseDto(mockMessage)).thenReturn(mockMessageResponseDto);
+        when(messageMapper.entityToResponseDto(any())).thenReturn(mockMessageResponseDto);
 
-        MessageResponseDto messageResponseDto = messageService.updateById(mockMessageRequestDto, id);
+        assertThrows(MessageNotFoundException.class, () -> messageService.updateById(mockMessageRequestDto, id));
 
-        assertEquals(mockMessageResponseDto, messageResponseDto);
         verify(messageRepository).findById(id);
-        verify(messageRepository).save(mockMessage);
-        verify(messageMapper).updateEntityFromRequestDto(mockMessage, mockMessageRequestDto);
+        verify(messageMapper, never()).updateEntityFromRequestDto(mockMessage, mockMessageRequestDto);
+        verify(messageRepository, never()).save(mockMessage);
+        verify(messageMapper, never()).entityToResponseDto(mockMessage);
     }
 
     @Test
     void deleteById() {
-        when(messageRepository.existsById(anyLong())).thenReturn(true);
+        when(messageRepository.existsById(anyLong())).thenReturn(false);
 
-        messageService.deleteById(id);
+        assertThrows(MessageNotFoundException.class, () -> messageService.deleteById(id));
 
-        verify(messageRepository).deleteById(id);
+        verify(messageRepository).existsById(id);
+        verify(messageRepository, never()).deleteById(id);
     }
 }

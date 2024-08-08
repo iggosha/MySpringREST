@@ -66,7 +66,7 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public List<PersonResponseDto> getAll() {
         List<Person> personList = personRepository.findAll();
-        checkIfPersonListNotEmpty(personList);
+        throwExceptionIfPersonListIsEmpty(personList);
         return personMapper.entityListToResponseDtoList(personList);
     }
 
@@ -80,7 +80,7 @@ public class PersonServiceImpl implements PersonService {
             personList = personRepository
                     .findAllByNameContainingIgnoreCase(pageable, name).getContent();
         }
-        checkIfPersonListNotEmpty(personList);
+        throwExceptionIfPersonListIsEmpty(personList);
         return personMapper.entityListToResponseDtoList(personList);
     }
 
@@ -108,13 +108,13 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public void deleteById(Long id) {
-        checkIfPersonExistsById(id);
+        throwExceptionIfNoPersonExistsById(id);
         personRepository.deleteById(id);
     }
 
     @Override
     public void deleteByName(String name) {
-        checkIfPersonExistsByName(name);
+        throwExceptionIfNoPersonExistsByName(name);
         personRepository.deleteByName(name);
     }
 
@@ -130,19 +130,19 @@ public class PersonServiceImpl implements PersonService {
         return personMapper.entityToResponseDto(person);
     }
 
-    private void checkIfPersonExistsById(Long id) {
+    private void throwExceptionIfNoPersonExistsById(Long id) {
         if (!personRepository.existsById(id)) {
             throw new PersonNotFoundException(STR."No person with id \{id} was found");
         }
     }
 
-    private void checkIfPersonExistsByName(String name) {
+    private void throwExceptionIfNoPersonExistsByName(String name) {
         if (!personRepository.existsByName(name)) {
             throw new PersonNotFoundException(STR."No person with name '\{name}' was found");
         }
     }
 
-    private void checkIfPersonListNotEmpty(List<Person> personList) {
+    private void throwExceptionIfPersonListIsEmpty(List<Person> personList) {
         if (personList.isEmpty()) {
             throw new PersonNotFoundException("No person was found");
         }

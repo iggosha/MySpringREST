@@ -26,7 +26,7 @@ import java.util.List;
 @RequestMapping("${app.people-url}")
 @SecurityRequirement(name = "Authorization")
 @AllArgsConstructor
-public class PersonController {
+public class PersonSearchController {
 
     private final PersonService personService;
 
