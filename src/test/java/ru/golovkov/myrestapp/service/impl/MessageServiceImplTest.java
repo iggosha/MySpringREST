@@ -5,10 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import ru.golovkov.myrestapp.mapper.MessageMapper;
 import ru.golovkov.myrestapp.model.dto.request.MessageRequestDto;
 import ru.golovkov.myrestapp.model.dto.response.MessageResponseDto;
@@ -84,7 +81,7 @@ class MessageServiceImplTest {
     @Test
     void create() {
         when(messageMapper.requestDtoToEntity(mockMessageRequestDto)).thenReturn(mockMessage);
-        when(messageRepository.save(any())).thenReturn(mockMessage);
+        when(messageRepository.save(any(Message.class))).thenReturn(mockMessage);
         when(messageMapper.entityToResponseDto(mockMessage)).thenReturn(mockMessageResponseDto);
 
         MessageResponseDto messageResponseDto = messageService.create(mockMessageRequestDto);
@@ -126,7 +123,7 @@ class MessageServiceImplTest {
                         anyLong(),
                         anyLong(),
                         anyString(),
-                        any()))
+                        any(Pageable.class)))
                 .thenReturn(mockMessagePage);
         when(messageMapper.entityListToResponseDtoList(mockMessageList)).thenReturn(mockMessageResponseDtoList);
 
@@ -145,7 +142,7 @@ class MessageServiceImplTest {
                         anyLong(),
                         anyLong(),
                         anyString(),
-                        any()))
+                        any(Pageable.class)))
                 .thenReturn(mockMessagePage);
         when(messageMapper.entityListToResponseDtoList(mockMessageList)).thenReturn(mockMessageResponseDtoList);
 
@@ -163,7 +160,7 @@ class MessageServiceImplTest {
                 .findAllByReceiver_IdAndSender_Id(
                         anyLong(),
                         anyLong(),
-                        any()))
+                        any(Pageable.class)))
                 .thenReturn(mockMessagePage);
         when(messageMapper.entityListToResponseDtoList(mockMessageList)).thenReturn(mockMessageResponseDtoList);
 
@@ -181,7 +178,7 @@ class MessageServiceImplTest {
                 .findAllWithSenderByIds(
                         anyLong(),
                         anyLong(),
-                        any()))
+                        any(Pageable.class)))
                 .thenReturn(mockMessagePage);
         when(messageMapper.entityListToResponseDtoList(mockMessageList)).thenReturn(mockMessageResponseDtoList);
 
@@ -196,7 +193,7 @@ class MessageServiceImplTest {
     @Test
     void updateById() {
         when(messageRepository.findById(anyLong())).thenReturn(Optional.of(mockMessage));
-        when(messageRepository.save(any())).thenReturn(mockMessage);
+        when(messageRepository.save(any(Message.class))).thenReturn(mockMessage);
         when(messageMapper.entityToResponseDto(mockMessage)).thenReturn(mockMessageResponseDto);
 
         MessageResponseDto messageResponseDto = messageService.updateById(mockMessageRequestDto, id);

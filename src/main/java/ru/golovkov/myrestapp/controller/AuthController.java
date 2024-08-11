@@ -17,7 +17,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.golovkov.myrestapp.exception.ExceptionDetails;
 import ru.golovkov.myrestapp.exception.entity.WrongPasswordException;
@@ -86,7 +85,7 @@ public class AuthController {
                     )}
             )
     })
-    public JwtResponseDto postLogin(@Valid @ParameterObject PersonAuthRequestDto personAuthRequestDto) {
+    public JwtResponseDto postLogin(@Valid @RequestBody @ParameterObject PersonAuthRequestDto personAuthRequestDto) {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 personAuthRequestDto.getName(),
                 personAuthRequestDto.getPassword()
@@ -106,7 +105,6 @@ public class AuthController {
             )}
     )
     @ResponseStatus(HttpStatus.CREATED)
-    @Validated
     public PersonResponseDto postRegistration(@Valid @ParameterObject PersonRequestDto personRequestDto) {
         return personService.create(personRequestDto);
     }

@@ -8,6 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import ru.golovkov.myrestapp.exception.entity.MessageNotFoundException;
 import ru.golovkov.myrestapp.mapper.MessageMapper;
@@ -81,8 +82,8 @@ class MessageServiceImplExceptionTest {
 
     @Test
     void create_EntityExists_ThrowsDataIntegrityViolationException() {
-        when(messageMapper.requestDtoToEntity(any())).thenReturn(mockMessage);
-        when(messageRepository.save(any())).thenThrow(DataIntegrityViolationException.class);
+        when(messageMapper.requestDtoToEntity(any(MessageRequestDto.class))).thenReturn(mockMessage);
+        when(messageRepository.save(any(Message.class))).thenThrow(DataIntegrityViolationException.class);
 
         assertThrows(DataIntegrityViolationException.class,
                 () -> messageService.create(mockMessageRequestDto));
@@ -95,7 +96,7 @@ class MessageServiceImplExceptionTest {
     @Test
     void getById_EntityDoesntExist_ThrowsPersonNotFoundException() {
         when(messageRepository.findById(anyLong())).thenReturn(Optional.empty());
-        when(messageMapper.entityToResponseDto(any())).thenReturn(mockMessageResponseDto);
+        when(messageMapper.entityToResponseDto(any(Message.class))).thenReturn(mockMessageResponseDto);
 
         assertThrows(MessageNotFoundException.class, () -> messageService.getById(id));
 
@@ -121,7 +122,7 @@ class MessageServiceImplExceptionTest {
                         anyLong(),
                         anyLong(),
                         anyString(),
-                        any()))
+                        any(Pageable.class)))
                 .thenReturn(Page.empty());
         when(messageMapper.entityListToResponseDtoList(anyList())).thenReturn(mockMessageResponseDtoList);
 
@@ -139,7 +140,7 @@ class MessageServiceImplExceptionTest {
                         anyLong(),
                         anyLong(),
                         anyString(),
-                        any()))
+                        any(Pageable.class)))
                 .thenReturn(Page.empty());
         when(messageMapper.entityListToResponseDtoList(anyList())).thenReturn(mockMessageResponseDtoList);
 
@@ -156,7 +157,7 @@ class MessageServiceImplExceptionTest {
                 .findAllByReceiver_IdAndSender_Id(
                         anyLong(),
                         anyLong(),
-                        any()))
+                        any(Pageable.class)))
                 .thenReturn(Page.empty());
         when(messageMapper.entityListToResponseDtoList(anyList())).thenReturn(mockMessageResponseDtoList);
 
@@ -173,7 +174,7 @@ class MessageServiceImplExceptionTest {
                 .findAllWithSenderByIds(
                         anyLong(),
                         anyLong(),
-                        any()))
+                        any(Pageable.class)))
                 .thenReturn(Page.empty());
         when(messageMapper.entityListToResponseDtoList(anyList())).thenReturn(mockMessageResponseDtoList);
 
@@ -187,8 +188,8 @@ class MessageServiceImplExceptionTest {
     @Test
     void updateById() {
         when(messageRepository.findById(anyLong())).thenReturn(Optional.empty());
-        when(messageRepository.save(any())).thenReturn(mockMessage);
-        when(messageMapper.entityToResponseDto(any())).thenReturn(mockMessageResponseDto);
+        when(messageRepository.save(any(Message.class))).thenReturn(mockMessage);
+        when(messageMapper.entityToResponseDto(any(Message.class))).thenReturn(mockMessageResponseDto);
 
         assertThrows(MessageNotFoundException.class, () -> messageService.updateById(mockMessageRequestDto, id));
 

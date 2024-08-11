@@ -132,7 +132,7 @@ public class PersonServiceImpl implements PersonService {
 
     private void throwExceptionIfNoPersonExistsById(Long id) {
         if (!personRepository.existsById(id)) {
-            throw new PersonNotFoundException(STR."No person with id \{id} was found");
+            throw new PersonNotFoundException(id);
         }
     }
 
@@ -144,14 +144,14 @@ public class PersonServiceImpl implements PersonService {
 
     private void throwExceptionIfPersonListIsEmpty(List<Person> personList) {
         if (personList.isEmpty()) {
-            throw new PersonNotFoundException("No person was found");
+            throw new PersonNotFoundException();
         }
     }
 
     private Person getPersonById(Long id) {
         return personRepository
                 .findById(id)
-                .orElseThrow(() -> new PersonNotFoundException(STR."No person with id \{id} was found"));
+                .orElseThrow(() -> new PersonNotFoundException(id));
     }
 
     private Person getPersonByName(String name) {

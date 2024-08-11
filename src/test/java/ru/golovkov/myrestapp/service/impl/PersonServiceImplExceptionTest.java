@@ -8,6 +8,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.golovkov.myrestapp.exception.entity.PersonNotFoundException;
@@ -81,7 +82,7 @@ class PersonServiceImplExceptionTest {
     @Test
     void create_EntityExists_ThrowsDataIntegrityViolationException() {
         when(personMapper.requestDtoToEntity(mockPersonRequestDto)).thenReturn(mockPerson);
-        when(personRepository.save(any())).thenThrow(DataIntegrityViolationException.class);
+        when(personRepository.save(any(Person.class))).thenThrow(DataIntegrityViolationException.class);
 
         assertThrows(DataIntegrityViolationException.class,
                 () -> personService.create(mockPersonRequestDto));
@@ -125,7 +126,7 @@ class PersonServiceImplExceptionTest {
 
     @Test
     void getAllByNameContaining_EntitiesDontExist_ThrowsPersonNotFoundException() {
-        when(personRepository.findAllByNameContainingIgnoreCase(any(), anyString())).thenReturn(Page.empty());
+        when(personRepository.findAllByNameContainingIgnoreCase(any(Pageable.class), anyString())).thenReturn(Page.empty());
         when(personMapper.entityListToResponseDtoList(mockPersonList)).thenReturn(List.of());
 
         assertThrows(PersonNotFoundException.class,
@@ -139,7 +140,7 @@ class PersonServiceImplExceptionTest {
     void updateById_EntityDoesntExist_ThrowsPersonNotFoundException() {
         when(personRepository.findById(anyLong())).thenReturn(Optional.empty());
         when(personMapper.entityToResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
-        when(personRepository.save(any())).thenReturn(mockPerson);
+        when(personRepository.save(any(Person.class))).thenReturn(mockPerson);
 
         assertThrows(PersonNotFoundException.class,
                 () -> personService.updateById(mockPersonRequestDto, id));
@@ -153,7 +154,7 @@ class PersonServiceImplExceptionTest {
     @Test
     void updateByName_EntityDoesntExist_ThrowsPersonNotFoundException() {
         when(personRepository.findByName(anyString())).thenReturn(Optional.empty());
-        when(personRepository.save(any())).thenReturn(mockPerson);
+        when(personRepository.save(any(Person.class))).thenReturn(mockPerson);
         when(personMapper.entityToResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
 
         assertThrows(PersonNotFoundException.class,
@@ -190,8 +191,8 @@ class PersonServiceImplExceptionTest {
     void upgradeRole_EntityDoesntExist_ThrowsPersonNotFoundException() {
         when(personRepository.findById(anyLong())).thenReturn(Optional.empty());
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-        when(personRepository.save(any())).thenReturn(mockPerson);
-        when(personMapper.entityToResponseDto(any())).thenReturn(mockPersonResponseDto);
+        when(personRepository.save(any(Person.class))).thenReturn(mockPerson);
+        when(personMapper.entityToResponseDto(any(Person.class))).thenReturn(mockPersonResponseDto);
 
         assertThrows(PersonNotFoundException.class,
                 () -> personService.upgradeRole(name, id));
@@ -206,8 +207,8 @@ class PersonServiceImplExceptionTest {
     void upgradeRole_BadCredentials_ThrowsBadRequestException() {
         when(personRepository.findById(anyLong())).thenReturn(Optional.of(mockPerson));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
-        when(personRepository.save(any())).thenReturn(mockPerson);
-        when(personMapper.entityToResponseDto(any())).thenReturn(mockPersonResponseDto);
+        when(personRepository.save(any(Person.class))).thenReturn(mockPerson);
+        when(personMapper.entityToResponseDto(any(Person.class))).thenReturn(mockPersonResponseDto);
 
         assertThrows(WrongPasswordException.class,
                 () -> personService.upgradeRole(name, id));

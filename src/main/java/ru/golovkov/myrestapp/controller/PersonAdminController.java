@@ -31,7 +31,7 @@ public class PersonAdminController {
     @Operation(summary = "Удаление пользователя по имени")
     @ApiResponse(
             responseCode = "200",
-            description = "Роль пользователя с указанным ID изменена на ADMIN",
+            description = "Данные пользователя с успешно изменённой ролью",
             content = {@Content(
                     schema = @Schema(implementation = PersonResponseDto.class),
                     mediaType = MediaType.APPLICATION_JSON_VALUE
@@ -48,7 +48,7 @@ public class PersonAdminController {
     @Operation(summary = "Удаление пользователя по имени")
     @ApiResponse(
             responseCode = "200",
-            description = "Удалённый пользователь",
+            description = "Успешно удалённый пользователь",
             content = {@Content(
                     schema = @Schema(implementation = PersonResponseDto.class),
                     mediaType = MediaType.APPLICATION_JSON_VALUE
@@ -65,7 +65,7 @@ public class PersonAdminController {
     @Operation(summary = "Изменение данных пользователя по ID")
     @ApiResponse(
             responseCode = "200",
-            description = "Пользователь изменён",
+            description = "Успешно изменённый пользователь",
             content = {@Content(
                     schema = @Schema(implementation = PersonResponseDto.class),
                     mediaType = MediaType.APPLICATION_JSON_VALUE
@@ -80,7 +80,7 @@ public class PersonAdminController {
     @Operation(summary = "Изменение данных пользователя по имени")
     @ApiResponse(
             responseCode = "200",
-            description = "Пользователь с запрашиваемым именем изменён",
+            description = "Успешно изменённый пользователь",
             content = {@Content(
                     schema = @Schema(implementation = PersonResponseDto.class),
                     mediaType = MediaType.APPLICATION_JSON_VALUE
@@ -96,7 +96,7 @@ public class PersonAdminController {
     @Operation(summary = "Удаление пользователя по ID")
     @ApiResponse(
             responseCode = "200",
-            description = "Удаленный пользователь",
+            description = "Успешно удаленный пользователь",
             content = {@Content(
                     schema = @Schema(implementation = PersonResponseDto.class),
                     mediaType = MediaType.APPLICATION_JSON_VALUE
@@ -108,7 +108,6 @@ public class PersonAdminController {
         personService.deleteById(id);
         return personResponseDto;
     }
-
 
     @ApiResponse(
             responseCode = "400",

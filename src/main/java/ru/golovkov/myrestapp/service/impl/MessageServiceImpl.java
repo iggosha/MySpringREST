@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.golovkov.myrestapp.exception.entity.MessageNotFoundException;
-import ru.golovkov.myrestapp.exception.httpcommon.ForbiddenException;
+import ru.golovkov.myrestapp.exception.entity.MessageOperationForbiddenException;
 import ru.golovkov.myrestapp.mapper.MessageMapper;
 import ru.golovkov.myrestapp.model.dto.request.MessageRequestDto;
 import ru.golovkov.myrestapp.model.dto.response.MessageResponseDto;
@@ -88,9 +88,11 @@ public class MessageServiceImpl implements MessageService {
     public MessageResponseDto updateById(MessageRequestDto requestDto, Long messageId) {
         Message message = getMessageById(messageId);
         if (!message.getSender().getId().equals(requestDto.getSenderId())) {
-            throw new ForbiddenException(STR.
-                    "Another sender's messages aren't available for editing! Current user's ID: \{
-                            message.getSender().getId()}, sender's ID: \{requestDto.getSenderId()}");
+            throw new MessageOperationForbiddenException(
+                    MessageOperationForbiddenException.OperationType.EDITING,
+                    message.getSender().getId(),
+                    requestDto.getSenderId()
+            );
         }
         messageMapper.updateEntityFromRequestDto(message, requestDto);
         message = messageRepository.save(message);
@@ -106,18 +108,18 @@ public class MessageServiceImpl implements MessageService {
     private Message getMessageById(Long id) {
         return messageRepository
                 .findById(id)
-                .orElseThrow(() -> new MessageNotFoundException(STR."No message with id \{id} was found"));
+                .orElseThrow(() -> new MessageNotFoundException(id));
     }
 
     private void throwExceptionIfNoMessageExistsById(Long id) {
         if (!messageRepository.existsById(id)) {
-            throw new MessageNotFoundException(STR."No message with id \{id} was found");
+            throw new MessageNotFoundException(id);
         }
     }
 
     private void throwExceptionIfMessageListIsEmpty(List<Message> messageList) {
         if (messageList.isEmpty()) {
-            throw new MessageNotFoundException("No message was found");
+            throw new MessageNotFoundException();
         }
     }
 }

@@ -5,10 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import ru.golovkov.myrestapp.mapper.PersonMapper;
 import ru.golovkov.myrestapp.model.dto.request.PersonRequestDto;
@@ -84,7 +81,7 @@ class PersonServiceImplTest {
     @Test
     void create() {
         when(personMapper.requestDtoToEntity(mockPersonRequestDto)).thenReturn(mockPerson);
-        when(personRepository.save(any())).thenReturn(mockPerson);
+        when(personRepository.save(any(Person.class))).thenReturn(mockPerson);
         when(personMapper.entityToResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
 
         PersonResponseDto personResponseDto = personService.create(mockPersonRequestDto);
@@ -134,7 +131,7 @@ class PersonServiceImplTest {
 
     @Test
     void getAllByNameContaining() {
-        when(personRepository.findAllByNameContainingIgnoreCase(any(), anyString())).thenReturn(mockPersonPage);
+        when(personRepository.findAllByNameContainingIgnoreCase(any(Pageable.class), anyString())).thenReturn(mockPersonPage);
         when(personMapper.entityListToResponseDtoList(mockPersonList)).thenReturn(mockPersonResponseDtoList);
 
         List<PersonResponseDto> personResponseDtoList =
@@ -148,7 +145,7 @@ class PersonServiceImplTest {
     @Test
     void updateById() {
         when(personRepository.findById(anyLong())).thenReturn(Optional.of(mockPerson));
-        when(personRepository.save(any())).thenReturn(mockPerson);
+        when(personRepository.save(any(Person.class))).thenReturn(mockPerson);
         when(personMapper.entityToResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
 
         PersonResponseDto personResponseDto = personService.updateById(mockPersonRequestDto, id);
@@ -163,7 +160,7 @@ class PersonServiceImplTest {
     @Test
     void updateByName() {
         when(personRepository.findByName(anyString())).thenReturn(Optional.of(mockPerson));
-        when(personRepository.save(any())).thenReturn(mockPerson);
+        when(personRepository.save(any(Person.class))).thenReturn(mockPerson);
         when(personMapper.entityToResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
 
         PersonResponseDto personResponseDto = personService.updateByName(mockPersonRequestDto, name);
@@ -197,7 +194,7 @@ class PersonServiceImplTest {
     void upgradeRole() {
         when(personRepository.findById(anyLong())).thenReturn(Optional.of(mockPerson));
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
-        when(personRepository.save(any())).thenReturn(mockPerson);
+        when(personRepository.save(any(Person.class))).thenReturn(mockPerson);
         when(personMapper.entityToResponseDto(mockPerson)).thenReturn(mockPersonResponseDto);
 
         PersonResponseDto personResponseDto = personService.upgradeRole(name, id);
