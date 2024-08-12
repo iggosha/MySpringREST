@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.golovkov.myrestapp.exception.ExceptionDetails;
 import ru.golovkov.myrestapp.exception.entity.MessageNotFoundException;
 import ru.golovkov.myrestapp.exception.entity.MessageOperationForbiddenException;
-import ru.golovkov.myrestapp.exception.httpcommon.ForbiddenException;
+import ru.golovkov.myrestapp.exception.httpcommon.UnauthorizedException;
 import ru.golovkov.myrestapp.model.dto.response.MessageResponseDto;
 import ru.golovkov.myrestapp.security.PersonDetails;
 import ru.golovkov.myrestapp.service.MessageService;
@@ -45,7 +45,7 @@ public class MessageSearchController {
             responseCode = "403",
             description = "Запрещено искать сообщения других пользователей",
             content = {@Content(
-                    schema = @Schema(implementation = ForbiddenException.class),
+                    schema = @Schema(implementation = ExceptionDetails.class),
                     mediaType = MediaType.APPLICATION_JSON_VALUE
             )}
     )
@@ -54,13 +54,7 @@ public class MessageSearchController {
                                              @AuthenticationPrincipal PersonDetails personDetails) {
         Long principalId = personDetails.getPerson().getId();
         MessageResponseDto messageResponseDto = messageService.getById(id);
-        if (!messageResponseDto.getSenderId().equals(principalId)) {
-            throw new MessageOperationForbiddenException(
-                    MessageOperationForbiddenException.OperationType.SEARCHING,
-                    principalId,
-                    messageResponseDto.getSenderId()
-            );
-        }
+        throwExceptionIfPrincipalIsNotSender(messageResponseDto, principalId);
         return messageResponseDto;
     }
 
@@ -117,6 +111,16 @@ public class MessageSearchController {
         return messageService.getListWithSenderByIdsAndContent(principalId, senderId, content, pageable);
     }
 
+    private void throwExceptionIfPrincipalIsNotSender(MessageResponseDto messageResponseDto, Long principalId) {
+        if (!messageResponseDto.getSenderId().equals(principalId)) {
+            throw new MessageOperationForbiddenException(
+                    MessageOperationForbiddenException.OperationType.SEARCHING,
+                    principalId,
+                    messageResponseDto.getSenderId()
+            );
+        }
+    }
+
     @ApiResponse(
             responseCode = "404",
             description = "Ни одного сообщения не найдено",
@@ -128,6 +132,20 @@ public class MessageSearchController {
     @ExceptionHandler(MessageNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ExceptionDetails handleMessageNotFoundException(MessageNotFoundException e) {
+        return new ExceptionDetails(e.toString());
+    }
+
+    @ApiResponse(
+            responseCode = "401",
+            description = "Пользователь не авторизован",
+            content = {@Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ExceptionDetails.class)
+            )}
+    )
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ExceptionDetails handleUnauthorizedException(UnauthorizedException e) {
         return new ExceptionDetails(e.toString());
     }
 }

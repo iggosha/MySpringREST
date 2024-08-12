@@ -14,8 +14,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import ru.golovkov.myrestapp.exception.httpcommon.BadRequestException;
 import ru.golovkov.myrestapp.exception.ExceptionDetails;
+import ru.golovkov.myrestapp.exception.entity.PersonNotFoundException;
+import ru.golovkov.myrestapp.exception.httpcommon.BadRequestException;
 import ru.golovkov.myrestapp.service.PersonDetailsService;
 
 import java.io.IOException;
@@ -51,7 +52,7 @@ public class JwtFilter extends OncePerRequestFilter {
                     if (SecurityContextHolder.getContext().getAuthentication() == null) {
                         SecurityContextHolder.getContext().setAuthentication(authToken);
                     }
-                } catch (JWTVerificationException e) {
+                } catch (JWTVerificationException | PersonNotFoundException e) {
                     setBadRequestInvalidJwtResponse(response, e);
                     return;
                 }

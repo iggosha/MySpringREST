@@ -32,15 +32,15 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(AuthController.class)
+@WebMvcTest(AccountController.class)
 @AutoConfigureMockMvc(addFilters = false)
-class AuthControllerTest {
+class AccountControllerTest {
 
     private static String jwtToken;
     private static PersonAuthRequestDto personAuthRequestDto;
@@ -58,7 +58,7 @@ class AuthControllerTest {
     @MockBean
     private AuthenticationManager authenticationManager;
     @InjectMocks
-    private AuthController authController;
+    private AccountController accountController;
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -190,5 +190,21 @@ class AuthControllerTest {
                 )
                 .andExpect(status().isCreated())
                 .andExpect(content().json(objectMapper.writeValueAsString(personResponseDto)));
+    }
+
+    @SneakyThrows
+    @Test
+    @WithMockUser(roles = "BASE")
+    void updateCurrentUser() {
+        when(personService.updateById(any(PersonRequestDto.class), anyLong())).thenReturn(personResponseDto);
+        when(jwtUtil.generateToken(any(String.class))).thenReturn(jwtToken);
+        JwtResponseDto jwtResponseDto = new JwtResponseDto(jwtToken);
+
+        mockMvc.perform(put("/api/people/current-user")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(personRequestDto))
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(jwtResponseDto)));
     }
 }

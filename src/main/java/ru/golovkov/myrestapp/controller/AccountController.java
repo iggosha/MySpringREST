@@ -1,6 +1,5 @@
 package ru.golovkov.myrestapp.controller;
 
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -33,7 +32,7 @@ import ru.golovkov.myrestapp.service.PersonService;
 @RestController
 @RequestMapping("${app.people-url}")
 @AllArgsConstructor
-public class AuthController {
+public class AccountController {
 
     private final PersonService personService;
     private final JwtUtil jwtUtil;
@@ -65,6 +64,42 @@ public class AuthController {
         return personDetails.getPerson();
     }
 
+    @SneakyThrows
+    @SecurityRequirement(name = "Authorization")
+    @PutMapping("/current-user")
+    @Operation(summary = "Изменение данных текущего пользователя")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Успешно изменённые данные",
+                    content = {@Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = PersonResponseDto.class)
+                    )}
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "Пользователь не авторизован",
+                    content = {@Content(
+                            mediaType = MediaType.APPLICATION_JSON_VALUE,
+                            schema = @Schema(implementation = ExceptionDetails.class)
+                    )}
+            )
+    })
+    public JwtResponseDto updateCurrentUser(@AuthenticationPrincipal PersonDetails personDetails,
+                                            @RequestBody PersonRequestDto personRequestDto) {
+        if (personRequestDto.getPassword() == null) {
+            throw new WrongPasswordException("Correct password is required to update user data");
+        }
+        personService.updateById(personRequestDto, personDetails.getPerson().getId());
+        UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                personRequestDto.getName(),
+                personRequestDto.getPassword()
+        );
+        verifyCredentials(authToken);
+        return new JwtResponseDto(jwtUtil.generateToken(personRequestDto.getName()));
+    }
+
     @PostMapping(value = "/public/login")
     @Operation(summary = "Вход и получение JWT")
     @ApiResponses(value = {
@@ -85,7 +120,7 @@ public class AuthController {
                     )}
             )
     })
-    public JwtResponseDto postLogin(@Valid @RequestBody @ParameterObject PersonAuthRequestDto personAuthRequestDto) {
+    public JwtResponseDto postLogin(@Valid @RequestBody PersonAuthRequestDto personAuthRequestDto) {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                 personAuthRequestDto.getName(),
                 personAuthRequestDto.getPassword()
@@ -93,7 +128,6 @@ public class AuthController {
         verifyCredentials(authToken);
         return new JwtResponseDto(jwtUtil.generateToken(personAuthRequestDto.getName()));
     }
-
 
     @PostMapping("/public/registration")
     @Operation(summary = "Регистрация")

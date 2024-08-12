@@ -15,7 +15,6 @@ public class JwtUtil {
 
     @Value("${app.jwt-secret}")
     private String secret;
-
     private static final String ISSUER = "igor";
     private static final String SUBJECT = "User Details";
     private static final String CLAIM_NAME = "username";

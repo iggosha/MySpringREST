@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.golovkov.myrestapp.exception.ExceptionDetails;
 import ru.golovkov.myrestapp.exception.entity.MessageNotFoundException;
 import ru.golovkov.myrestapp.exception.httpcommon.ForbiddenException;
+import ru.golovkov.myrestapp.exception.httpcommon.UnauthorizedException;
 import ru.golovkov.myrestapp.model.dto.request.MessageRequestDto;
 import ru.golovkov.myrestapp.model.dto.response.MessageResponseDto;
 import ru.golovkov.myrestapp.security.PersonDetails;
@@ -83,7 +84,7 @@ public class MessageController {
             responseCode = "403",
             description = "Запрещено обновлять сообщения других пользователей",
             content = {@Content(
-                    schema = @Schema(implementation = ForbiddenException.class),
+                    schema = @Schema(implementation = ExceptionDetails.class),
                     mediaType = MediaType.APPLICATION_JSON_VALUE
             )}
     )
@@ -109,7 +110,7 @@ public class MessageController {
             responseCode = "403",
             description = "Запрещено удалять сообщения других пользователей",
             content = {@Content(
-                    schema = @Schema(implementation = ForbiddenException.class),
+                    schema = @Schema(implementation = ExceptionDetails.class),
                     mediaType = MediaType.APPLICATION_JSON_VALUE
             )}
     )
@@ -138,6 +139,21 @@ public class MessageController {
     @ExceptionHandler(MessageNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ExceptionDetails handleMessageNotFoundException(MessageNotFoundException e) {
+        return new ExceptionDetails(e.toString());
+    }
+
+
+    @ApiResponse(
+            responseCode = "401",
+            description = "Пользователь не авторизован",
+            content = {@Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema = @Schema(implementation = ExceptionDetails.class)
+            )}
+    )
+    @ExceptionHandler(UnauthorizedException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ExceptionDetails handleUnauthorizedException(UnauthorizedException e) {
         return new ExceptionDetails(e.toString());
     }
 }

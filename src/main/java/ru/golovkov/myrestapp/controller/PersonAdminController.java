@@ -28,7 +28,7 @@ public class PersonAdminController {
 
     private final PersonService personService;
 
-    @Operation(summary = "Удаление пользователя по имени")
+    @Operation(summary = "Изменение роли пользователя по ID")
     @ApiResponse(
             responseCode = "200",
             description = "Данные пользователя с успешно изменённой ролью",
