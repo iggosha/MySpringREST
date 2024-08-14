@@ -51,7 +51,12 @@
             <version>6.3.0</version>
             <scope>test</scope>
         </dependency>
-<!--        /spring-->
+        <!--        /spring-->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+            <version>4.29.1</version>
+        </dependency>
         <dependency>
             <groupId>com.auth0</groupId>
             <artifactId>java-jwt</artifactId>

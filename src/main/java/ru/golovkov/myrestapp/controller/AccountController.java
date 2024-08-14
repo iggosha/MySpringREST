@@ -30,7 +30,7 @@ import ru.golovkov.myrestapp.security.PersonDetails;
 import ru.golovkov.myrestapp.service.PersonService;
 
 @RestController
-@RequestMapping("${app.people-url}")
+@RequestMapping("${app.url.people}")
 @AllArgsConstructor
 public class AccountController {
 

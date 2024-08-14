@@ -21,7 +21,7 @@ import ru.golovkov.myrestapp.model.dto.response.PersonResponseDto;
 import ru.golovkov.myrestapp.service.PersonService;
 
 @RestController
-@RequestMapping("${app.people-url}/admin")
+@RequestMapping("${app.url.admin}")
 @SecurityRequirement(name = "Authorization")
 @AllArgsConstructor
 public class PersonAdminController {

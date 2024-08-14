@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet id="3" author="Igor Golovkov" created="15-08-2024">
+        <insert tableName="people">
+            <column name="id" value="1"/>
+            <column name="name" value="useradmin"/>
+            <!--            111111-->
+            <column name="password" value="$2a$10$6.SuPJOcdh7gKc2mlIFK0.VJZ7ejqEyQMuJJAjXOIPE0upuJhAsa2"/>
+            <column name="email" value="user@admin.com"/>
+            <column name="age" value="52"/>
+            <column name="role" value="ROLE_ADMIN"/>
+            <column name="registration_date" value="2001-01-01"/>
+        </insert>
+        <insert tableName="people">
+            <column name="id" value="2"/>
+            <column name="name" value="baseuser"/>
+            <column name="password" value="$2a$10$6.SuPJOcdh7gKc2mlIFK0.VJZ7ejqEyQMuJJAjXOIPE0upuJhAsa2"/>
+            <column name="email" value="base@user.com"/>
+            <column name="age" value="52"/>
+            <column name="role" value="ROLE_BASE"/>
+            <column name="registration_date" value="2002-02-02"/>
+        </insert>
+        <sql>
+            ALTER SEQUENCE people_id_seq RESTART WITH 3;
+        </sql>
+    </changeSet>
+</databaseChangeLog>

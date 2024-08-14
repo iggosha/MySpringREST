@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.6.xsd">
+    <changeSet id="2" author="Igor Golovkov" created="14-08-2024">
+        <createTable tableName="messages">
+            <column name="id" type="bigint" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="content" type="varchar">
+                <constraints unique="true"/>
+            </column>
+            <column name="sent_at" type="dateTime"/>
+            <column name="sender_id" type="bigint">
+                <constraints foreignKeyName="messages_sender_id_fkey" references="people(id)"/>
+            </column>
+            <column name="receiver_id" type="bigint">
+                <constraints foreignKeyName="messages_receiver_id_fkey" references="people(id)"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

@@ -13,11 +13,11 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    @Value("${app.jwt-secret}")
-    private String secret;
     private static final String ISSUER = "igor";
     private static final String SUBJECT = "User Details";
     private static final String CLAIM_NAME = "username";
+    @Value("${app.secret}")
+    private String secret;
 
     public String generateToken(String username) {
         Date expirationDate = Date.from(ZonedDateTime.now().plusMinutes(60).toInstant());

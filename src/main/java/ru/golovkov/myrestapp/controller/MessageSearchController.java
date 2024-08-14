@@ -25,7 +25,7 @@ import ru.golovkov.myrestapp.service.MessageService;
 import java.util.List;
 
 @RestController
-@RequestMapping("${app.messages-url}")
+@RequestMapping("${app.url.messages}")
 @SecurityRequirement(name = "Authorization")
 @AllArgsConstructor
 public class MessageSearchController {

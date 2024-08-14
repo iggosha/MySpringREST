@@ -24,7 +24,7 @@ import ru.golovkov.myrestapp.service.PersonService;
 import java.util.List;
 
 @RestController
-@RequestMapping("${app.people-url}")
+@RequestMapping("${app.url.people}")
 @SecurityRequirement(name = "Authorization")
 @AllArgsConstructor
 public class PersonSearchController {

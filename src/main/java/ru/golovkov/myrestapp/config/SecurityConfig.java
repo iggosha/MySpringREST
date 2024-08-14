@@ -31,8 +31,10 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint authEntryPoint;
     private final JwtFilter jwtFilter;
 
-    @Value("${app.people-url}")
-    private String baseUrl;
+    @Value("${app.url.people}")
+    private String peopleUrl;
+    @Value("${app.url.admin}")
+    private String adminUrl;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -40,7 +42,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(
-                                baseUrl + "/public/**",
+                                peopleUrl + "/public/**",
                                 "/css/**",
                                 "/img/**",
                                 "/error",
@@ -48,7 +50,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
-                        .requestMatchers(baseUrl + "/admin/**")
+                        .requestMatchers(adminUrl + "/**")
                         .hasRole(UserRole.ROLE_ADMIN.name())
                         .anyRequest()
                         .authenticated()
