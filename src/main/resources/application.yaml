@@ -6,9 +6,6 @@ spring:
       naming:
         physical-strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
       ddl-auto: none
-    properties:
-      hibernate:
-        show_sql: true
   datasource:
     password: 3gor
     url: jdbc:postgresql://localhost:5432/myrestapp

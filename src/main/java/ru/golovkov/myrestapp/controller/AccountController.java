@@ -17,6 +17,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import ru.golovkov.myrestapp.aspect.LoggingMark;
 import ru.golovkov.myrestapp.exception.ExceptionDetails;
 import ru.golovkov.myrestapp.exception.entity.WrongPasswordException;
 import ru.golovkov.myrestapp.exception.httpcommon.BadRequestException;
@@ -32,6 +33,7 @@ import ru.golovkov.myrestapp.service.PersonService;
 @RestController
 @RequestMapping("${app.url.people}")
 @AllArgsConstructor
+@LoggingMark
 public class AccountController {
 
     private final PersonService personService;
