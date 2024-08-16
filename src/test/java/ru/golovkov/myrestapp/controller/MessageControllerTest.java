@@ -157,7 +157,7 @@ class MessageControllerTest {
     void postMessage() throws Exception {
         when(messageService.create(any(MessageRequestDto.class))).thenReturn(messageResponseDto1);
 
-        mockMvc.perform(post("/api/messages/{receiverId}", receiver.getId())
+        mockMvc.perform(post("/api/v1/messages/{receiverId}", receiver.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content1)
                 )
@@ -173,7 +173,7 @@ class MessageControllerTest {
                 any(Pageable.class))
         ).thenReturn(messageResponseDtoList);
 
-        mockMvc.perform(get("/api/messages/with/{senderId}", sender.getId())
+        mockMvc.perform(get("/api/v1/messages/with/{senderId}", sender.getId())
                         .param("page", "0")
                         .param("size", "10")
                         .param("sort", "sentAt,desc")
@@ -187,7 +187,7 @@ class MessageControllerTest {
     void putMessageById() throws Exception {
         when(messageService.updateById(any(MessageRequestDto.class), anyLong())).thenReturn(messageResponseDto1);
 
-        mockMvc.perform(put("/api/messages/{id}", id1)
+        mockMvc.perform(put("/api/v1/messages/{id}", id1)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(content1)
                 )
@@ -200,7 +200,7 @@ class MessageControllerTest {
     void deleteMessageById() throws Exception {
         when(messageService.getById(anyLong())).thenReturn(messageResponseDto1);
 
-        mockMvc.perform(delete("/api/messages/{id}", id1))
+        mockMvc.perform(delete("/api/v1/messages/{id}", id1))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(messageResponseDto1)));
     }

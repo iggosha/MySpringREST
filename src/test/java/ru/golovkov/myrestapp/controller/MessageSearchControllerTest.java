@@ -155,7 +155,7 @@ class MessageSearchControllerTest {
     void getMessageById() throws Exception {
         when(messageService.getById(anyLong())).thenReturn(messageResponseDto1);
 
-        mockMvc.perform(get("/api/messages/{id}", id1))
+        mockMvc.perform(get("/api/v1/messages/{id}", id1))
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(messageResponseDto1)));
     }
@@ -165,7 +165,7 @@ class MessageSearchControllerTest {
     void getMessageListFromSenderById() throws Exception {
         when(messageService.getListFromSenderById(anyLong(), anyLong(), any(Pageable.class))).thenReturn(messageResponseDtoList);
 
-        mockMvc.perform(get("/api/messages/from/{senderId}", sender.getId())
+        mockMvc.perform(get("/api/v1/messages/from/{senderId}", sender.getId())
                         .param("page", "0")
                         .param("size", "10")
                         .param("sort", "sentAt,desc")
@@ -179,7 +179,7 @@ class MessageSearchControllerTest {
     void getMessageListFromSenderByIdAndContent() throws Exception {
         when(messageService.getListFromSenderByIdAndContent(anyLong(), anyLong(), anyString(), any(Pageable.class))).thenReturn(messageResponseDtoList);
 
-        mockMvc.perform(get("/api/messages/search-from/{senderId}", sender.getId())
+        mockMvc.perform(get("/api/v1/messages/search-from/{senderId}", sender.getId())
                         .param("content", content1)
                         .param("page", "0")
                         .param("size", "10")
@@ -194,7 +194,7 @@ class MessageSearchControllerTest {
     void getMessageListWithSenderByIdsAndContent() throws Exception {
         when(messageService.getListWithSenderByIdsAndContent(anyLong(), anyLong(), anyString(), any(Pageable.class))).thenReturn(messageResponseDtoList);
 
-        mockMvc.perform(get("/api/messages/search-with/{senderId}", sender.getId())
+        mockMvc.perform(get("/api/v1/messages/search-with/{senderId}", sender.getId())
                         .param("content", content1)
                         .param("page", "0")
                         .param("size", "10")

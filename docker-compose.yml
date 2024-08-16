@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8888:8888"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5555/myspringrest
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 3gor

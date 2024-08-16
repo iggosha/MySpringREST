@@ -150,7 +150,7 @@ class AccountControllerTest {
     @Test
     @WithMockUser
     void getCurrentUser() {
-        mockMvc.perform(get("/api/people/current-user")
+        mockMvc.perform(get("/api/v1/people/current-user")
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -163,7 +163,7 @@ class AccountControllerTest {
         when(jwtUtil.generateToken(any(String.class))).thenReturn(jwtToken);
 
         JwtResponseDto jwtResponseDto = new JwtResponseDto(jwtToken);
-        mockMvc.perform(post("/api/people/public/login")
+        mockMvc.perform(post("/api/v1/people/public/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(personAuthRequestDto))
                 )
@@ -174,7 +174,7 @@ class AccountControllerTest {
     @Test
     void postLoginThrowsWrongPasswordException() throws Exception {
         when(authenticationManager.authenticate(any())).thenThrow(WrongPasswordException.class);
-        mockMvc.perform(post("/api/people/public/login")
+        mockMvc.perform(post("/api/v1/people/public/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(personAuthRequestDto)))
                 .andExpect(status().isBadRequest());
@@ -184,7 +184,7 @@ class AccountControllerTest {
     @Test
     void postRegistration() {
         when(personService.create(any(PersonRequestDto.class))).thenReturn(personResponseDto);
-        mockMvc.perform(post("/api/people/public/registration")
+        mockMvc.perform(post("/api/v1/people/public/registration")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(personRequestDto))
                 )
@@ -200,7 +200,7 @@ class AccountControllerTest {
         when(jwtUtil.generateToken(any(String.class))).thenReturn(jwtToken);
         JwtResponseDto jwtResponseDto = new JwtResponseDto(jwtToken);
 
-        mockMvc.perform(put("/api/people/current-user")
+        mockMvc.perform(put("/api/v1/people/current-user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(personRequestDto))
                 )

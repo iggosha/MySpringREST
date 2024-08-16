@@ -68,7 +68,7 @@ class PersonSearchControllerTest {
     @WithMockUser
     void getPersonList() {
         when(personService.getAllByNameContaining(anyString(), any(Pageable.class))).thenReturn(personResponseDtoList);
-        mockMvc.perform(get("/api/people")
+        mockMvc.perform(get("/api/v1/people")
                         .param("nameToSearch", "name")
                         .param("page", "0")
                         .param("size", "10")
@@ -84,7 +84,7 @@ class PersonSearchControllerTest {
     @WithMockUser
     void getPersonById() {
         when(personService.getById(anyLong())).thenReturn(personResponseDto);
-        mockMvc.perform(get("/api/people/{id}", id)
+        mockMvc.perform(get("/api/v1/people/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
@@ -96,7 +96,7 @@ class PersonSearchControllerTest {
     @WithMockUser
     void getPersonByName() {
         when(personService.getByName(anyString())).thenReturn(personResponseDto);
-        mockMvc.perform(get("/api/people/search")
+        mockMvc.perform(get("/api/v1/people/search")
                         .param("nameToSearch", "name")
                         .contentType(MediaType.APPLICATION_JSON)
                 )

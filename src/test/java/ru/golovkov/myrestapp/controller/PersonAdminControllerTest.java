@@ -132,7 +132,7 @@ class PersonAdminControllerTest {
     @WithMockUser(roles = "ADMIN")
     void upgradeRole() {
         when(personService.upgradeRole(anyString(), anyLong())).thenReturn(personResponseDto);
-        mockMvc.perform(put("/api/people/admin/upgrade-role")
+        mockMvc.perform(put("/api/v1/people/admin/upgrade-role")
                         .param("rawPasswordOfPerson", "password")
                         .param("id", "1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -147,7 +147,7 @@ class PersonAdminControllerTest {
     void deletePersonByName() {
         when(personService.getByName(anyString())).thenReturn(personResponseDto);
         doNothing().when(personService).deleteByName(anyString());
-        mockMvc.perform(delete("/api/people/admin")
+        mockMvc.perform(delete("/api/v1/people/admin")
                         .param("nameToSearch", "name")
                         .contentType(MediaType.APPLICATION_JSON)
                 )
@@ -160,7 +160,7 @@ class PersonAdminControllerTest {
     @WithMockUser(roles = "ADMIN")
     void updatePersonById() {
         when(personService.updateById(any(PersonRequestDto.class), anyLong())).thenReturn(personResponseDto);
-        mockMvc.perform(put("/api/people/admin/{id}", id)
+        mockMvc.perform(put("/api/v1/people/admin/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(personRequestDto))
                 )
@@ -173,7 +173,7 @@ class PersonAdminControllerTest {
     @WithMockUser(roles = "ADMIN")
     void updatePersonByName() {
         when(personService.updateByName(any(PersonRequestDto.class), anyString())).thenReturn(personResponseDto);
-        mockMvc.perform(put("/api/people/admin")
+        mockMvc.perform(put("/api/v1/people/admin")
                         .param("nameToSearch", "name")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(personRequestDto))
@@ -188,7 +188,7 @@ class PersonAdminControllerTest {
     void deletePersonById() {
         when(personService.getById(anyLong())).thenReturn(personResponseDto);
         doNothing().when(personService).deleteById(anyLong());
-        mockMvc.perform(delete("/api/people/admin/{id}", id)
+        mockMvc.perform(delete("/api/v1/people/admin/{id}", id)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
