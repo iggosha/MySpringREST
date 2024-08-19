@@ -10,14 +10,13 @@
     </parent>
     <groupId>org.myspring</groupId>
     <artifactId>MySpringREST</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
     <name>MySpringREST</name>
     <description>MySpringREST</description>
     <properties>
         <maven.test.skip>true</maven.test.skip>
         <java.version>21</java.version>
     </properties>
-
     <dependencies>
         <!-- Spring dependencies -->
         <dependency>
